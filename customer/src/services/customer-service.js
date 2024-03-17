@@ -85,7 +85,7 @@ class CustomerService {
         }
     }
 
-    async GetShopingDetails(id){
+    async GetShoppingDetails(id){
 
         try {
             const existingCustomer = await this.repository.FindCustomerById({id});
@@ -121,11 +121,12 @@ class CustomerService {
     }
 
     async ManageCart(customerId, product, qty, isRemove){
+        console.log('MANAGE CART - CUSTOMER - SERVICE', customerId, product, qty, isRemove);
         try {
             const cartResult = await this.repository.AddCartItem(customerId, product, qty, isRemove);        
             return FormateData(cartResult);
         } catch (err) {
-            throw new APIError('Data Not found', err)
+            throw new APIError('Data Not found bree!', err)
         }
     }
 
@@ -141,7 +142,7 @@ class CustomerService {
     async SubscribeEvents(payload){
  
         const { event, data } =  payload;
-
+        console.log('DENEME : ', event, data);
         const { userId, product, order, qty } = data;
 
         switch(event){
@@ -150,7 +151,7 @@ class CustomerService {
                 this.AddToWishlist(userId,product)
                 break;
             case 'ADD_TO_CART':
-                this.ManageCart(userId,product, qty, false);
+                this.ManageCart(userId, product, qty, false);
                 break;
             case 'REMOVE_FROM_CART':
                 this.ManageCart(userId,product,qty, true);

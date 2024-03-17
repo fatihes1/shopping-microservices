@@ -71,9 +71,6 @@ class CustomerRepository {
     try {
       const existingCustomer = await CustomerModel.findById(id)
         .populate("address")
-        .populate("wishlist")
-        .populate("orders")
-        .populate("cart.product");
       return existingCustomer;
     } catch (err) {
       throw new APIError(
@@ -100,7 +97,24 @@ class CustomerRepository {
     }
   }
 
-  async AddWishlistItem(customerId, product) {
+  async AddWishlistItem(customerId, {
+    _id,
+      name,
+      desc,
+      price,
+      available,
+      banner
+  }) {
+
+    const product = {
+      _id,
+      name,
+      desc,
+      price,
+      available,
+      banner
+    }
+
     try {
       const profile = await CustomerModel.findById(customerId).populate(
         "wishlist"
@@ -141,15 +155,27 @@ class CustomerRepository {
     }
   }
 
-  async AddCartItem(customerId, product, qty, isRemove) {
+  async AddCartItem(customerId,
+   {
+      _id,
+      name,
+      price,
+      banner
+   },
+      qty, isRemove) {
     try {
       const profile = await CustomerModel.findById(customerId).populate(
-        "cart.product"
+        "cart"
       );
 
       if (profile) {
         const cartItem = {
-          product,
+          product : {
+            _id,
+            name,
+            price,
+            banner
+          },
           unit: qty,
         };
 
@@ -158,7 +184,7 @@ class CustomerRepository {
         if (cartItems.length > 0) {
           let isExist = false;
           cartItems.map((item) => {
-            if (item.product._id.toString() === product._id.toString()) {
+            if (item.product._id.toString() === _id.toString()) {
               if (isRemove) {
                 cartItems.splice(cartItems.indexOf(item), 1);
               } else {
@@ -177,9 +203,7 @@ class CustomerRepository {
 
         profile.cart = cartItems;
 
-        const cartSaveResult = await profile.save();
-
-        return cartSaveResult.cart;
+        return await profile.save();
       }
 
       throw new Error("Unable to add to cart!");
@@ -195,9 +219,9 @@ class CustomerRepository {
   async AddOrderToProfile(customerId, order) {
     try {
       const profile = await CustomerModel.findById(customerId);
-
+      console.log('PROFILE', profile, order)
       if (profile) {
-        if (profile.orders == undefined) {
+        if (profile.orders === undefined) {
           profile.orders = [];
         }
         profile.orders.push(order);
