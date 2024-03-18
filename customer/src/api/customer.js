@@ -1,8 +1,14 @@
 const CustomerService = require("../services/customer-service");
 const UserAuth = require("./middlewares/auth");
+const { SubscribeMessage } = require("../utils");
 
-module.exports = (app) => {
+
+module.exports = (app, channel) => {
   const service = new CustomerService();
+  console.log('HERE', channel)
+   SubscribeMessage(channel, service).then(r => {
+     console.log(r, "subscribed");
+   });
 
   app.post("/signup", async (req, res, next) => {
     try {
