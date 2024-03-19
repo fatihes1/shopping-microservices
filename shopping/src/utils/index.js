@@ -1,8 +1,9 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const axios = require("axios");
+//const axios = require("axios");
+const amqplib = require('amqplib');
 
-const { APP_SECRET } = require("../config");
+const { APP_SECRET, EXCHANGE_NAME, MESSAGE_BROKER_URL, QUEUE_NAME, SHOPPING_BINDING_KEY} = require("../config");
 
 //Utility functions
 module.exports.GenerateSalt = async () => {
@@ -51,10 +52,49 @@ module.exports.FormateData = (data) => {
   }
 };
 
-
+/*
 module.exports.PublishCustomerEvent = async (payload) => {
   axios.post('http://localhost:8004/customer/app-events', {
     payload
   })
 }
+*/
 
+// Instead of using webhooks, we can use message broker like RabbitMQ or Kafka to publish events
+
+// Create a channel
+module.exports.CreateChannel = async () => {
+  try {
+    const connection = await amqplib.connect(MESSAGE_BROKER_URL)
+    const channel = await connection.createChannel()
+    await channel.assertExchange(EXCHANGE_NAME, 'direct', false);
+    return channel;
+  } catch (e) {
+    throw e;
+  }
+}
+
+// Create Message
+module.exports.PublishMessage = async (channel, bindingKey, message) => {
+  try {
+    await channel.publish(EXCHANGE_NAME, bindingKey, Buffer.from(message));
+    console.log('Message has been sent ' + message)
+  } catch (e) {
+    throw e;
+  }
+}
+
+// Subscribe to the messages
+module.exports.SubscribeMessage = async (channel, service) => {
+  console.log('CHANNEL', channel)
+  const appQueue = await channel.assertQueue(QUEUE_NAME);
+
+  channel.bindQueue(appQueue.queue, EXCHANGE_NAME, SHOPPING_BINDING_KEY);
+
+  channel.consume(appQueue.queue, data => {
+    console.log(`Received message in Shopping Service: ${data.content.toString()}`);
+    service.SubscribeEvents(data.content.toString());
+    channel.ack(data);
+  })
+
+}

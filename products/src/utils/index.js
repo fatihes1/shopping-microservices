@@ -90,7 +90,7 @@ module.exports.PublishMessage = async (channel, bindingKey, message) => {
 
 // Subscribe to the messages
 module.exports.SubscribeMessage = async (channel, bindingKey) => {
-  const appQueue = await channel.assertQueue('QUEUE_NAME');
+  const appQueue = await channel.assertQueue(QUEUE_NAME);
 
   channel.bindQueue(appQueue.queue, EXCHANGE_NAME, bindingKey);
 
