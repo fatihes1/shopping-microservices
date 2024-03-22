@@ -1,172 +1,143 @@
-const { CustomerRepository } = require("../database");
-const { FormateData, GeneratePassword, GenerateSalt, GenerateSignature, ValidatePassword } = require('../utils');
-const { APIError, BadRequestError } = require('../utils/app-errors')
+import { CustomerRepository } from "../database/index.js";
+import { FormatData, GeneratePassword, GenerateSalt, GenerateSignature, ValidatePassword } from '../utils/index.js';
+import { APIError } from '../utils/app-errors.js';
 
-
-// All Business logic will be here
 class CustomerService {
-
-    constructor(){
+    constructor() {
         this.repository = new CustomerRepository();
     }
 
-    async SignIn(userInputs){
-
+    async signIn(userInputs) {
         const { email, password } = userInputs;
-        
         try {
-            
-            const existingCustomer = await this.repository.FindCustomer({ email});
+            const existingCustomer = await this.repository.findCustomer({ email });
 
-            if(existingCustomer){
-            
+            if (existingCustomer) {
                 const validPassword = await ValidatePassword(password, existingCustomer.password, existingCustomer.salt);
-                
-                if(validPassword){
-                    const token = await GenerateSignature({ email: existingCustomer.email, _id: existingCustomer._id});
-                    return FormateData({id: existingCustomer._id, token });
-                } 
+
+                if (validPassword) {
+                    const token = await GenerateSignature({ email: existingCustomer.email, _id: existingCustomer._id });
+                    return FormatData({ id: existingCustomer._id, token });
+                }
             }
-    
-            return FormateData(null);
+
+            return FormatData(null);
 
         } catch (err) {
-            throw new APIError('Data Not found', err)
+            throw new APIError('Data Not found', err);
         }
-
-       
     }
 
-    async SignUp(userInputs){
-        
+    async signUp(userInputs) {
         const { email, password, phone } = userInputs;
-        
-        try{
-            // create salt
+        try {
             let salt = await GenerateSalt();
-            
             let userPassword = await GeneratePassword(password, salt);
-            
-            const existingCustomer = await this.repository.CreateCustomer({ email, password: userPassword, phone, salt});
-            
-            const token = await GenerateSignature({ email: email, _id: existingCustomer._id});
+            const existingCustomer = await this.repository.createCustomer({ email, password: userPassword, phone, salt });
+            const token = await GenerateSignature({ email, _id: existingCustomer._id });
+            return FormatData({ id: existingCustomer._id, token });
 
-            return FormateData({id: existingCustomer._id, token });
-
-        }catch(err){
-            throw new APIError('Data Not found', err)
-        }
-
-    }
-
-    async AddNewAddress(_id,userInputs){
-        
-        const { street, postalCode, city,country} = userInputs;
-        
-        try {
-            const addressResult = await this.repository.CreateAddress({ _id, street, postalCode, city,country})
-            return FormateData(addressResult);
-            
         } catch (err) {
-            throw new APIError('Data Not found', err)
+            throw new APIError('Data Not found', err);
         }
-        
-    
     }
 
-    async GetProfile(id){
-
+    async addNewAddress(_id, userInputs) {
+        const { street, postalCode, city, country } = userInputs;
         try {
-            const existingCustomer = await this.repository.FindCustomerById({id});
-            return FormateData(existingCustomer);
-            
+            const addressResult = await this.repository.createAddress({ _id, street, postalCode, city, country });
+            return FormatData(addressResult);
+
         } catch (err) {
-            throw new APIError('Data Not found', err)
+            throw new APIError('Data Not found', err);
         }
     }
 
-    async GetShoppingDetails(id){
-
+    async getProfile(id) {
         try {
-            const existingCustomer = await this.repository.FindCustomerById({id});
-    
-            if(existingCustomer){
-               return FormateData(existingCustomer);
-            }       
-            return FormateData({ msg: 'Error'});
-            
+            const existingCustomer = await this.repository.findCustomerById({ id });
+            return FormatData(existingCustomer);
+
         } catch (err) {
-            throw new APIError('Data Not found', err)
+            throw new APIError('Data Not found', err);
         }
     }
 
-    async GetWishList(customerId){
-
+    async getShoppingDetails(id) {
         try {
-            const wishListItems = await this.repository.Wishlist(customerId);
-            return FormateData(wishListItems);
+            const existingCustomer = await this.repository.findCustomerById({ id });
+
+            if (existingCustomer) {
+                return FormatData(existingCustomer);
+            }
+            return FormatData({ msg: 'Error' });
+
         } catch (err) {
-            throw new APIError('Data Not found', err)           
+            throw new APIError('Data Not found', err);
         }
     }
 
-    async AddToWishlist(customerId, product){
+    async getWishList(customerId) {
         try {
-            const wishlistResult = await this.repository.AddWishlistItem(customerId, product);        
-           return FormateData(wishlistResult);
-    
+            const wishListItems = await this.repository.wishlist(customerId);
+            return FormatData(wishListItems);
         } catch (err) {
-            throw new APIError('Data Not found', err)
+            throw new APIError('Data Not found', err);
         }
     }
 
-    async ManageCart(customerId, product, qty, isRemove){
-        console.log('MANAGE CART - CUSTOMER - SERVICE', customerId, product, qty, isRemove);
+    async addToWishlist(customerId, product) {
         try {
-            const cartResult = await this.repository.AddCartItem(customerId, product, qty, isRemove);        
-            return FormateData(cartResult);
+            const wishlistResult = await this.repository.addWishlistItem(customerId, product);
+            return FormatData(wishlistResult);
         } catch (err) {
-            throw new APIError('Data Not found bree!', err)
+            throw new APIError('Data Not found', err);
         }
     }
 
-    async ManageOrder(customerId, order){
+    async manageCart(customerId, product, qty, isRemove) {
         try {
-            const orderResult = await this.repository.AddOrderToProfile(customerId, order);
-            return FormateData(orderResult);
+            const cartResult = await this.repository.addCartItem(customerId, product, qty, isRemove);
+            return FormatData(cartResult);
         } catch (err) {
-            throw new APIError('Data Not found', err)
+            throw new APIError('Data Not found bree!', err);
         }
     }
 
-    async SubscribeEvents(payload){
+    async manageOrder(customerId, order) {
+        try {
+            const orderResult = await this.repository.addOrderToProfile(customerId, order);
+            return FormatData(orderResult);
+        } catch (err) {
+            throw new APIError('Data Not found', err);
+        }
+    }
+
+    async subscribeEvents(payload) {
 
         payload = JSON.parse(payload);
+        const { event, data } = payload;
 
-        const { event, data } =  payload;
-        console.log('DENEME : ', event, data);
         const { userId, product, order, qty } = data;
 
-        switch(event){
+        switch (event) {
             case 'ADD_TO_WISHLIST':
             case 'REMOVE_FROM_WISHLIST':
-                this.AddToWishlist(userId,product)
+                await this.addToWishlist(userId, product);
                 break;
             case 'ADD_TO_CART':
-                this.ManageCart(userId, product, qty, false);
+                await this.manageCart(userId, product, qty, false);
                 break;
             case 'REMOVE_FROM_CART':
-                this.ManageCart(userId,product,qty, true);
+                await this.manageCart(userId, product, qty, true);
                 break;
             case 'CREATE_ORDER':
-                this.ManageOrder(userId,order);
+                await this.manageOrder(userId, order);
                 break;
             default:
                 break;
         }
- 
     }
-
 }
 
-module.exports = CustomerService;
+export default CustomerService;

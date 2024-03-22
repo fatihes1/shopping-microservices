@@ -1,7 +1,7 @@
-const { ProductModel } = require("../models");
-const { APIError, BadRequestError } = require("../../utils/app-errors");
+import {Product} from "../models/index.js";
+import {APIError, STATUS_CODES} from "../../utils/app-errors.js";
 
-//Dealing with data base operations
+//Dealing with database operations
 class ProductRepository {
   async CreateProduct({
     name,
@@ -14,7 +14,7 @@ class ProductRepository {
     banner,
   }) {
     try {
-      const product = new ProductModel({
+      const product = new Product({
         name,
         desc,
         type,
@@ -25,8 +25,7 @@ class ProductRepository {
         banner,
       });
 
-      const productResult = await product.save();
-      return productResult;
+      return await product.save();
     } catch (err) {
       throw new APIError(
         "API Error",
@@ -38,7 +37,7 @@ class ProductRepository {
 
   async Products() {
     try {
-      return await ProductModel.find();
+      return await Product.find();
     } catch (err) {
       throw new APIError(
         "API Error",
@@ -50,7 +49,7 @@ class ProductRepository {
 
   async FindById(id) {
     try {
-      return await ProductModel.findById(id);
+      return await Product.findById(id);
     } catch (err) {
       throw new APIError(
         "API Error",
@@ -62,7 +61,7 @@ class ProductRepository {
 
   async FindByCategory(category) {
     try {
-      const products = await ProductModel.find({ type: category });
+      const products = await Product.find({ type: category });
       return products;
     } catch (err) {
       throw new APIError(
@@ -75,11 +74,10 @@ class ProductRepository {
 
   async FindSelectedProducts(selectedIds) {
     try {
-      const products = await ProductModel.find()
-        .where("_id")
-        .in(selectedIds.map((_id) => _id))
-        .exec();
-      return products;
+      return await Product.find()
+          .where("_id")
+          .in(selectedIds.map((_id) => _id))
+          .exec();
     } catch (err) {
       throw new APIError(
         "API Error",
@@ -90,4 +88,4 @@ class ProductRepository {
   }
 }
 
-module.exports = ProductRepository;
+export default ProductRepository;

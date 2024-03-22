@@ -1,26 +1,24 @@
-const express = require('express');
-const { PORT } = require('./config');
-const { databaseConnection } = require('./database');
-const expressApp = require('./express-app');
-const {CreateChannel} = require("./utils");
+import express from 'express';
+import config from './config/index.js'; // Adjust the path accordingly
+import { databaseConnection } from './database/index.js'; // Adjust the path accordingly
+import setupExpressApp from './express-app.js'; // Adjust the path accordingly
+import { CreateChannel } from './utils/index.js'; // Adjust the path accordingly
 
-const StartServer = async() => {
-
+const startServer = async () => {
     const app = express();
-    
+
     await databaseConnection();
 
     const channel = await CreateChannel();
 
-    await expressApp(app, channel);
+    await setupExpressApp(app, channel);
 
-    app.listen(PORT, () => {
-        console.log(`listening to port ${PORT}`);
-    })
-    .on('error', (err) => {
+    app.listen(config.PORT, () => {
+        console.log(`listening to port ${config.PORT}`);
+    }).on('error', (err) => {
         console.log(err);
         process.exit();
-    })
-}
+    });
+};
 
-StartServer();
+await startServer();

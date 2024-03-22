@@ -1,4 +1,7 @@
-module.exports = {
-    OrderModel: require('./Order'),
-    CartModel: require('./Cart')
+import Cart from "./Cart.js";
+import Order from "./Order.js";
+
+export {
+    Cart,
+    Order
 }

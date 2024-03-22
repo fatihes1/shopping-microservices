@@ -1,72 +1,56 @@
-const { createLogger, transports } = require('winston');
-const { AppError } = require('./app-errors');
+import { createLogger, transports } from 'winston';
+import { AppError } from './app-errors.js';
 
-
-const LogErrors = createLogger({
+const logErrors = createLogger({
     transports: [
-      new transports.Console(),
-      new transports.File({ filename: 'app_error.log' })
+        new transports.Console(),
+        new transports.File({ filename: 'app_error.log' })
     ]
-  });
-    
+});
 
 class ErrorLogger {
-    constructor(){}
-    async logError(err){
+    constructor() {}
+
+    async logError(err) {
         console.log('==================== Start Error Logger ===============');
-        LogErrors.log({
+        logErrors.log({
             private: true,
             level: 'error',
             message: `${new Date()}-${JSON.stringify(err)}`
-          });
+        });
         console.log('==================== End Error Logger ===============');
-        // log error with Logger plugins
-      
         return false;
     }
 
-    isTrustError(error){
-        if(error instanceof AppError){
-            return error.isOperational;
-        }else{
-            return false;
-        }
+    isTrustError(error) {
+        return error instanceof AppError && error.isOperational;
     }
 }
 
-const ErrorHandler = async(err,req,res,next) => {
-    
+const errorHandler = async (err, req, res, next) => {
     const errorLogger = new ErrorLogger();
 
-    process.on('uncaughtException', (reason, promise) => {
-        console.log(reason, 'UNHANDLED');
-        throw reason; // need to take care
-    })
-
-    process.on('uncaughtException', (error) => {
+    process.on('uncaughtException', error => {
         errorLogger.logError(error);
-        if(errorLogger.isTrustError(err)){
-            //process exist // need restart
+        if (errorLogger.isTrustError(err)) {
+            // Process needs to be restarted
         }
-    })
-    
-    // console.log(err.description, '-------> DESCRIPTION')
-    // console.log(err.message, '-------> MESSAGE')
-    // console.log(err.name, '-------> NAME')
-    if(err){
+    });
+
+    if (err) {
         await errorLogger.logError(err);
-        if(errorLogger.isTrustError(err)){
-            if(err.errorStack){
+        if (errorLogger.isTrustError(err)) {
+            if (err.errorStack) {
                 const errorDescription = err.errorStack;
-                return res.status(err.statusCode).json({'message': errorDescription})
+                return res.status(err.statusCode).json({ message: errorDescription });
             }
-            return res.status(err.statusCode).json({'message': err.message })
-        }else{
-            //process exit // terriablly wrong with flow need restart
+            return res.status(err.statusCode).json({ message: err.message });
+        } else {
+            // Process needs to be restarted
         }
-        return res.status(err.statusCode).json({'message': err.message})
+        return res.status(err.statusCode).json({ message: err.message });
     }
     next();
-}
+};
 
-module.exports = ErrorHandler;
+export default errorHandler;

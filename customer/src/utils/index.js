@@ -1,40 +1,39 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const { APP_SECRET, MESSAGE_BROKER_URL, EXCHANGE_NAME, QUEUE_NAME, CUSTOMER_BINDING_KEY} = require("../config");
-const amqplib = require('amqplib');
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import config from "../config/index.js";
 
+import amqplib from "amqplib";
 //Utility functions
-module.exports.GenerateSalt = async () => {
-  return await bcrypt.genSalt();
-};
+export async function GenerateSalt (){
+  return bcrypt.genSalt();
+}
 
-module.exports.GeneratePassword = async (password, salt) => {
+export async function GeneratePassword (password, salt){
   return await bcrypt.hash(password, salt);
-};
+}
 
-module.exports.ValidatePassword = async (
+export async function ValidatePassword (
   enteredPassword,
   savedPassword,
   salt
-) => {
-  return (await this.GeneratePassword(enteredPassword, salt)) === savedPassword;
-};
+){
+  return (await GeneratePassword(enteredPassword, salt)) === savedPassword;
+}
 
-module.exports.GenerateSignature = async (payload) => {
+export async function GenerateSignature (payload) {
   try {
-    return await jwt.sign(payload, APP_SECRET, { expiresIn: "30d" });
+    return await jwt.sign(payload, config.APP_SECRET, { expiresIn: "30d" });
   } catch (error) {
     console.log(error);
     return error;
   }
-};
+}
 
-module.exports.ValidateSignature = async (req) => {
+export async function ValidateSignature (req){
   try {
     const signature = req.get("Authorization");
     console.log(signature);
-    const payload = await jwt.verify(signature.split(" ")[1], APP_SECRET);
-    req.user = payload;
+    req.user = await jwt.verify(signature.split(" ")[1], config.APP_SECRET);
     return true;
   } catch (error) {
     console.log(error);
@@ -42,22 +41,22 @@ module.exports.ValidateSignature = async (req) => {
   }
 };
 
-module.exports.FormateData = (data) => {
+export function FormatData(data) {
   if (data) {
     return { data };
   } else {
     throw new Error("Data Not found!");
   }
-};
+}
 
 // Instead of using webhooks, we can use message broker like RabbitMQ or Kafka to publish events
 
 // Create a channel
-module.exports.CreateChannel = async () => {
+export async function CreateChannel(){
   try {
-    const connection = await amqplib.connect(MESSAGE_BROKER_URL)
+    const connection = await amqplib.connect(config.MESSAGE_BROKER_URL)
     const channel = await connection.createChannel()
-    await channel.assertExchange(EXCHANGE_NAME, 'direct', false);
+    await channel.assertExchange(config.EXCHANGE_NAME, 'direct', false);
     return channel;
   } catch (e) {
     throw e;
@@ -66,7 +65,7 @@ module.exports.CreateChannel = async () => {
 
 // In Customer Service we do not need to publish events, so we will not use the following functions
 /*
-module.exports.PublishMessage = async (channel, bindingKey, message) => {
+export const PublishMessage = async (channel, bindingKey, message) => {
   try {
     await channel.publish(EXCHANGE_NAME, bindingKey, Buffer.from(message));
   } catch (e) {
@@ -76,14 +75,15 @@ module.exports.PublishMessage = async (channel, bindingKey, message) => {
 */
 
 // Subscribe to the messages
-module.exports.SubscribeMessage = async (channel, service) => {
-    const appQueue = await channel.assertQueue(QUEUE_NAME);
+export async function SubscribeMessage (channel, service) {
+  const appQueue = await channel.assertQueue(config.QUEUE_NAME);
 
-  channel.bindQueue(appQueue.queue, EXCHANGE_NAME, CUSTOMER_BINDING_KEY);
+
+  channel.bindQueue(appQueue.queue, config.EXCHANGE_NAME, config.CUSTOMER_BINDING_KEY);
 
   channel.consume(appQueue.queue, data => {
     console.log(`Received message: ${data.content.toString()}`);
-    service.SubscribeEvents(data.content.toString())
+    service.subscribeEvents(data.content.toString())
     channel.ack(data);
   })
 

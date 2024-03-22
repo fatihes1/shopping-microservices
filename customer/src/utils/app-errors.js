@@ -8,15 +8,14 @@ const STATUS_CODES = {
 
 class AppError extends Error {
   constructor(
-    name,
-    statusCode,
-    description,
-    isOperational,
-    errorStack,
-    logingErrorResponse
+      name,
+      statusCode,
+      description,
+      isOperational,
+      errorStack,
+      logingErrorResponse
   ) {
     super(description);
-    Object.setPrototypeOf(this, new.target.prototype);
     this.name = name;
     this.statusCode = statusCode;
     this.isOperational = isOperational;
@@ -29,10 +28,10 @@ class AppError extends Error {
 //api Specific Errors
 class APIError extends AppError {
   constructor(
-    name,
-    statusCode = STATUS_CODES.INTERNAL_ERROR,
-    description = "Internal Server Error",
-    isOperational = true
+      name,
+      statusCode = STATUS_CODES.INTERNAL_ERROR,
+      description = "Internal Server Error",
+      isOperational = true
   ) {
     super(name, statusCode, description, isOperational);
   }
@@ -42,12 +41,12 @@ class APIError extends AppError {
 class BadRequestError extends AppError {
   constructor(description = "Bad request", logingErrorResponse) {
     super(
-      "NOT FOUND",
-      STATUS_CODES.BAD_REQUEST,
-      description,
-      true,
-      false,
-      logingErrorResponse
+        "NOT FOUND",
+        STATUS_CODES.BAD_REQUEST,
+        description,
+        true,
+        false,
+        logingErrorResponse
     );
   }
 }
@@ -56,19 +55,13 @@ class BadRequestError extends AppError {
 class ValidationError extends AppError {
   constructor(description = "Validation Error", errorStack) {
     super(
-      "BAD REQUEST",
-      STATUS_CODES.BAD_REQUEST,
-      description,
-      true,
-      errorStack
+        "BAD REQUEST",
+        STATUS_CODES.BAD_REQUEST,
+        description,
+        true,
+        errorStack
     );
   }
 }
 
-module.exports = {
-  AppError,
-  APIError,
-  BadRequestError,
-  ValidationError,
-  STATUS_CODES,
-};
+export { AppError, APIError, BadRequestError, ValidationError, STATUS_CODES };

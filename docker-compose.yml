@@ -66,6 +66,7 @@ services:
     build:
       dockerfile: Dockerfile
       context: ./proxy
+    container_name: nginx-proxy
     depends_on:
       - products
       - customer

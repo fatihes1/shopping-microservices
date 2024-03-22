@@ -1,5 +1,6 @@
-const { ShoppingRepository } = require("../database");
-const { FormateData } = require("../utils");
+import {ShoppingRepository} from "../database/index.js";
+import {APIError} from '../utils/app-errors.js';
+import {FormatData} from "../utils/index.js";
 
 // All Business logic will be here
 class ShoppingService {
@@ -7,10 +8,10 @@ class ShoppingService {
     this.repository = new ShoppingRepository();
   }
 
-  async GetCart({ _id }){
+  async GetCart ({ _id }){
       try {
         const cartItems = await this.repository.Cart(_id);
-        return FormateData(cartItems);
+        return FormatData(cartItems);
       } catch (e) {
         throw e;
       }
@@ -23,7 +24,7 @@ class ShoppingService {
 
     try {
       const orderResult = await this.repository.CreateNewOrder(_id, txnNumber);
-      return FormateData(orderResult);
+      return FormatData(orderResult);
     } catch (err) {
       throw new APIError("Data Not found", err);
     }
@@ -32,7 +33,7 @@ class ShoppingService {
   async GetOrders(customerId) {
     try {
       const orders = await this.repository.Orders(customerId);
-      return FormateData(orders);
+      return FormatData(orders);
     } catch (err) {
       throw new APIError("Data Not found", err);
     }
@@ -41,21 +42,22 @@ class ShoppingService {
   async ManageCart(customerId, item,qty, isRemove){
 
     const cartResult = await this.repository.AddCartItem(customerId, item, qty, isRemove);
-    return FormateData(cartResult);
+    return FormatData(cartResult);
   }
 
 
   async SubscribeEvents(payload){
     payload = JSON.parse(payload);
     const { event, data } = payload;
+    console.log('EVENT RECIVED:', event, data)
     const { userId, product, qty } = data;
-    console.log('HERE GII', event, data, userId, product, qty);
+
     switch(event){
       case 'ADD_TO_CART':
-        this.ManageCart(userId, product, qty, false);
+        await this.ManageCart(userId, product, qty, false);
         break;
       case 'REMOVE_FROM_CART':
-        this.ManageCart(userId,product, qty, true);
+        await this.ManageCart(userId, product, qty, true);
         break;
       default:
         break;
@@ -66,17 +68,15 @@ class ShoppingService {
   async GetOrderPayload(userId, order, event){
 
     if(order){
-      const payload = {
+      return {
         event: event,
-        data: { userId, order }
-      };
-
-      return payload
+        data: {userId, order}
+      }
     }else{
-      return FormateData({error: 'No Order Available'});
+      return FormatData({error: 'No Order Available'});
     }
 
   }
 }
 
-module.exports = ShoppingService;
+export default ShoppingService;

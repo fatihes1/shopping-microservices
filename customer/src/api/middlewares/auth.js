@@ -1,11 +1,16 @@
-const { ValidateSignature } = require('../../utils');
+import { ValidateSignature } from '../../utils/index.js';
 
-module.exports = async (req,res,next) => {
-    
-    const isAuthorized = await ValidateSignature(req);
+export const authMiddleware = async (req, res, next) => {
+    try {
+        const isAuthorized = await ValidateSignature(req);
 
-    if(isAuthorized){
-        return next();
+        if (isAuthorized) {
+            return next();
+        } else {
+            return res.status(403).json({ message: 'Not Authorized' });
+        }
+    } catch (error) {
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
-    return res.status(403).json({message: 'Not Authorized'})
-}
+};
+

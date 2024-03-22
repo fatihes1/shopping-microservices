@@ -1,17 +1,16 @@
-const { CustomerModel, ProductModel, OrderModel, CartModel} = require('../models');
-const { v4: uuidv4 } = require('uuid');
-const { APIError, BadRequestError, STATUS_CODES} = require('../../utils/app-errors')
+import {Cart, Order} from '../models/index.js';
+import {v4 as uuidv4} from 'uuid';
+import {APIError, STATUS_CODES} from "../../utils/app-errors.js";
 
 
-//Dealing with data base operations
+//Dealing with database operations
 class ShoppingRepository {
 
     // payment
 
     async Orders(customerId){
         try{
-            const orders = await OrderModel.find({ customerId });
-            return orders;
+            return await Order.find({customerId});
         }catch(err){
             throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Orders')
         }
@@ -19,9 +18,10 @@ class ShoppingRepository {
 
     async Cart(customerId) {
         try {
-            const cartItems = await CartModel.find({
+            const cartItems = await Cart.find({
                 customerId: customerId
             })
+            console.log(cartItems)
 
             if (cartItems) {
                 return cartItems;
@@ -33,7 +33,7 @@ class ShoppingRepository {
 
     async AddCartItem(customerId,item,qty,isRemove){
 
-        const cart = await CartModel.findOne({ customerId: customerId })
+        const cart = await Cart.findOne({ customerId: customerId })
         const { _id } = item;
 
         if(cart){
@@ -60,7 +60,7 @@ class ShoppingRepository {
 
             return await cart.save()
         }else{
-            return await CartModel.create({
+            return await Cart.create({
                 customerId,
                 items:[{product: { ...item}, unit: qty }]
             })
@@ -71,8 +71,7 @@ class ShoppingRepository {
     async CreateNewOrder(customerId, txnId){
 
         //required to verify payment through TxnId
-        const cart = await CartModel.findOne({ customerId: customerId })
-        console.log('HERE', cart);
+        const cart = await Cart.findOne({ customerId: customerId })
         if(cart){
             let amount = 0;
             let cartItems = cart.items;
@@ -86,7 +85,7 @@ class ShoppingRepository {
 
                 const orderId = uuidv4();
 
-                const order = new OrderModel({
+                const order = new Order({
                     orderId,
                     customerId,
                     amount,
@@ -104,4 +103,4 @@ class ShoppingRepository {
     }
 }
 
-module.exports = ShoppingRepository;
+export default ShoppingRepository;

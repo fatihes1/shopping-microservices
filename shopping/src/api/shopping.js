@@ -1,14 +1,14 @@
-const ShoppingService = require("../services/shopping-service");
-const UserAuth = require('./middlewares/auth');
-const { SubscribeMessage, PublishMessage} = require("../utils");
-const {SHOPPING_BINDING_KEY, CUSTOMER_BINDING_KEY} = require("../config");
+import ShoppingService from "../services/shopping-service.js";
+import { authMiddleware } from "./middlewares/auth.js";
+import { PublishMessage, SubscribeMessage } from "../utils/index.js";
+import config from '../config/index.js';
 
-module.exports = (app, channel) => {
+export default async  function(app, channel){
     
     const service = new ShoppingService();
-    SubscribeMessage(channel, service);
+    await SubscribeMessage(channel, service);
 
-    app.post('/order',UserAuth, async (req,res,next) => {
+    app.post('/order',authMiddleware, async (req,res,next) => {
 
         const { _id } = req.user;
         const { txnNumber } = req.body;
@@ -19,7 +19,7 @@ module.exports = (app, channel) => {
             const payload = await service.GetOrderPayload(_id, data, 'CREATE_ORDER');
 
             // PublishCustomerEvent(payload);
-            PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(payload));
+            await PublishMessage(channel, config.CUSTOMER_BINDING_KEY, JSON.stringify(payload));
 
             return res.status(200).json(data);
             
@@ -29,7 +29,7 @@ module.exports = (app, channel) => {
 
     });
 
-    app.get('/orders',UserAuth, async (req,res,next) => {
+    app.get('/orders',authMiddleware, async (req,res,next) => {
 
         const { _id } = req.user;
 
@@ -43,7 +43,7 @@ module.exports = (app, channel) => {
     });
        
     
-    app.get('/cart', UserAuth, async (req,res,next) => {
+    app.get('/cart', authMiddleware, async (req,res,next) => {
 
         const { _id } = req.user;
         try {

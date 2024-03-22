@@ -1,16 +1,16 @@
-const ShoppingService = require("../services/shopping-service");
+import ShoppingService from "../services/shopping-service.js";
 
-module.exports = (app) => {
-    const service = new ShoppingService();
-    app.use('/app-events',async (req,res,next) => {
+const shoppingService = new ShoppingService();
+
+export default function setupAppEvents(app) {
+    app.use('/app-events', (req, res, next) => {
         const { payload } = req.body;
-        console.log("============= Shopping Service Received Event ================");
 
-        //handle subscribe events
-        service.SubscribeEvents(payload);
+        shoppingService.SubscribeEvents(payload).then(r => {
+            console.log("============ Product Subscribed the Events ============");
+        });
 
-        return res.status(200).json({message: 'notified!'});
-
+        console.log("============ Product Service Received Event ============");
+        return res.status(200).json(payload);
     });
-
 }

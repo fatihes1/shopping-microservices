@@ -1,5 +1,8 @@
+import databaseConnection from './connection.js';
+import ProductRepository from './repository/product-repository.js';
+
 // database related modules
-module.exports = {
-    databaseConnection: require('./connection'),
-    ProductRepository: require('./repository/product-repository'),
+export {
+    databaseConnection,
+    ProductRepository
 }

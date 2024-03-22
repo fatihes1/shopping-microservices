@@ -1,5 +1,7 @@
+import products from './products.js'
+import appEvents from './app-events.js'
 
-module.exports = {
-    products: require('./products'),
-    appEvents: require('./app-events')
+export {
+    products,
+    appEvents
 }

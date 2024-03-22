@@ -1,13 +1,9 @@
-const ProductService = require('../services/product-service');
-const {
-    //PublishCustomerEvent,
-    //PublishShoppingEvent,
-    PublishMessage
-} = require('../utils');
-const UserAuth = require('./middlewares/auth')
-const {CUSTOMER_BINDING_KEY, SHOPPING_BINDING_KEY} = require("../config");
+import ProductService from '../services/product-service.js';
+import { PublishMessage } from "../utils/index.js";
+import { authMiddleware } from "./middlewares/auth.js";
+import config from '../config/index.js';
 
-module.exports = (app, channel) => {
+export default async function (app, channel){
     
     const service = new ProductService();
 
@@ -66,7 +62,7 @@ module.exports = (app, channel) => {
        
     });
      
-    app.put('/wishlist',UserAuth, async (req,res,next) => {
+    app.put('/wishlist',authMiddleware, async (req,res,next) => {
 
         const { _id } = req.user;
 
@@ -74,7 +70,7 @@ module.exports = (app, channel) => {
             // get payload to send customer service
             const { data } = await service.GerProductPayload(_id, { productId : req.body._id }, 'ADD_TO_WISHLIST');
             // PublishCustomerEvent(data);
-            PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.CUSTOMER_BINDING_KEY, JSON.stringify(data));
 
             return res.status(200).json(data.data.product);
         } catch (err) {
@@ -82,7 +78,7 @@ module.exports = (app, channel) => {
         }
     });
     
-    app.delete('/wishlist/:id',UserAuth, async (req,res,next) => {
+    app.delete('/wishlist/:id',authMiddleware, async (req,res,next) => {
 
         const { _id } = req.user;
         const productId = req.params.id;
@@ -90,7 +86,7 @@ module.exports = (app, channel) => {
         try {
             const { data } = await service.GerProductPayload(_id, { productId }, 'REMOVE_FROM_WISHLIST');
             //PublishCustomerEvent(data);
-            PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.CUSTOMER_BINDING_KEY, JSON.stringify(data));
 
             return res.status(200).json(data.data.product);
         } catch (err) {
@@ -99,17 +95,17 @@ module.exports = (app, channel) => {
     });
 
 
-    app.put('/cart',UserAuth, async (req, res, next) => {
+    app.put('/cart',authMiddleware, async (req, res, next) => {
         
         const { _id } = req.user;
         try {
             const { data } = await service.GerProductPayload(_id, { productId: req.body._id, qty: req.body.qty }, 'ADD_TO_CART');
 
             //PublishCustomerEvent(data);
-            PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.CUSTOMER_BINDING_KEY, JSON.stringify(data));
 
             //PublishShoppingEvent(data);
-            PublishMessage(channel, SHOPPING_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.SHOPPING_BINDING_KEY, JSON.stringify(data));
 
 
             const response = {
@@ -124,18 +120,18 @@ module.exports = (app, channel) => {
         }
     });
     
-    app.delete('/cart/:id',UserAuth, async (req,res,next) => {
+    app.delete('/cart/:id',authMiddleware, async (req,res,next) => {
 
         const { _id } = req.user;
-        const { productId } = req.params.id;
+        const productId = req.params.id;
 
         try {
-            const { data } = await service.GerProductPayload(_id, { productId: productId }, 'REMOVE_FROM_CART');
+            const { data } = await service.GerProductPayload(_id, { productId: productId, qty: 1 }, 'REMOVE_FROM_CART');
             //PublishCustomerEvent(data);
-            PublishMessage(channel, CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.CUSTOMER_BINDING_KEY, JSON.stringify(data));
 
             //PublishShoppingEvent(data);
-            PublishMessage(channel, SHOPPING_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.SHOPPING_BINDING_KEY, JSON.stringify(data));
 
 
             const response = {
@@ -155,7 +151,7 @@ module.exports = (app, channel) => {
         try {
             const { data} = await service.GetProducts();        
             return res.status(200).json(data);
-        } catch (error) {
+        } catch (err) {
             next(err)
         }
         

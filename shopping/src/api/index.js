@@ -1,5 +1,4 @@
+import shopping from "./shopping.js";
+import appEvents from "./app-events.js";
 
-module.exports = {
-    shopping: require('./shopping'),
-    appEvents: require('./app-events')
-}
+export { shopping, appEvents };

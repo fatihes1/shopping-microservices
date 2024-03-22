@@ -1,6 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
+
 
 const OrderSchema = new Schema({
     orderId: String,
@@ -33,4 +34,6 @@ const OrderSchema = new Schema({
     timestamps: true
 });
 
-module.exports =  mongoose.model('order', OrderSchema);
+const Order =  mongoose.model('order', OrderSchema);
+
+export default Order;
