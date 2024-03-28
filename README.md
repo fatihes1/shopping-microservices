@@ -39,10 +39,10 @@ Her servis, aşağıdaki NPM paketlerini kullanmaktadır:
 
 ## Çalıştırma Adımları
 
-    Projeyi yerel makinenize klonlayın.
-    Gerekli bağımlılıkları yüklemek için her bir mikroservis için npm install komutunu kullanın.
-    Docker ortamında projeyi çalıştırmak için docker-compose up komutunu kullanın.
-    Alternatif olarak, her servisi ayrı ayrı başlatmak için npm start komutunu her bir servis için kullanabilirsiniz.
+Projeyi yerel makinenize klonlayın.
+Gerekli bağımlılıkları yüklemek için her bir mikroservis için npm install komutunu kullanın.
+Docker ortamında projeyi çalıştırmak için docker-compose up komutunu kullanın.
+Alternatif olarak, her servisi ayrı ayrı başlatmak için npm start komutunu her bir servis için kullanabilirsiniz.
 
 ## Nginx Konfigürasyonu
 
