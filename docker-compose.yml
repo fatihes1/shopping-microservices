@@ -10,20 +10,6 @@ services:
       - '27017:27017'
     restart: always
 
-  products:
-    build:
-      dockerfile: Dockerfile
-      context: ./products
-    container_name: products
-    ports:
-      - '8006:8006'
-    restart: always
-    depends_on:
-      - mongo_db
-    volumes:
-      - .:/app
-      - /app/products/node_modules
-
   customer:
     build:
       dockerfile: Dockerfile
@@ -37,6 +23,20 @@ services:
     volumes:
       - .:/app
       - /app/customer/node_modules
+
+  products:
+    build:
+      dockerfile: Dockerfile
+      context: ./products
+    container_name: products
+    ports:
+      - '8006:8006'
+    restart: always
+    depends_on:
+      - mongo_db
+    volumes:
+      - .:/app
+      - /app/products/node_modules
 
   shopping:
     build:

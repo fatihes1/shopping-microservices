@@ -11,4 +11,4 @@ COPY . .
 
 EXPOSE 8007
 
-CMD ["npm", "run", "start:prod"]
+CMD ["npm", "run", "start"]
