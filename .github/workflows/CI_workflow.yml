@@ -1,4 +1,4 @@
-name: Continous Integration
+name: Continuous Integration
 
 on:
   pull_request:
@@ -24,4 +24,15 @@ jobs:
       run: |
         npm ci
         npm test
-      
+
+    - name: Test Product Service
+      working-directory: ./product
+      run: |
+        npm ci
+        npm test     
+
+    - name: Test Shopping Service
+      working-directory: ./Shopping
+      run: |
+        npm ci
+        npm test         
