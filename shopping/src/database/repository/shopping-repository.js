@@ -18,11 +18,9 @@ class ShoppingRepository {
 
     async Cart(customerId) {
         try {
-            const cartItems = await Cart.find({
+            const cartItems = await Cart.findOne({
                 customerId: customerId
             })
-            console.log(cartItems)
-
             if (cartItems) {
                 return cartItems;
             }
@@ -31,40 +29,25 @@ class ShoppingRepository {
         }
     }
 
-    async AddCartItem(customerId,item,qty,isRemove){
+    async ManageCart(customerId, product, qty, isRemove){
+        const cart = await Cart.findOne({ customerId });
 
-        const cart = await Cart.findOne({ customerId: customerId })
-        const { _id } = item;
-
-        if(cart){
-            let isExist = false;
-            let cartItems = cart.items;
-
-            if(cartItems.length > 0){
-                cartItems.map(item => {
-                    if(item.product._id.toString() === _id.toString()){
-                        if(isRemove){
-                            cartItems.splice(cartItems.indexOf(item), 1);
-                        }else{
-                            item.unit = qty;
-                        }
-                        isExist = true;
-                    }
-                });
+        if (cart) {
+            if (isRemove) {
+                // handle remove case
+            } else {
+                // handle update case
             }
-
-            if(!isExist && !isRemove){
-                cartItems.push({product: { ...item}, unit: qty });
-            }
-            cart.items = cartItems;
-
-            return await cart.save()
-        }else{
-            return await Cart.create({
+        }  else {
+            return Cart.create({
                 customerId,
-                items:[{product: { ...item}, unit: qty }]
+                items: [{
+                    product,
+                    unit: qty
+                }]
             })
         }
+
     }
 
 

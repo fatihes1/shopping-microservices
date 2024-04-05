@@ -42,9 +42,9 @@ module.exports.PublishShoppingEvent = async (payload) => {
 // Create a channel
 export async function CreateChannel(){
   try {
-    const connection = await amqplib.connect(config.MESSAGE_BROKER_URL)
+    const connection = await amqplib.connect(config.MSG_QUEUE_URL)
     const channel = await connection.createChannel()
-    await channel.assertExchange(config.EXCHANGE_NAME, 'direct', false);
+    await channel.assertExchange(config.EXCHANGE_NAME, 'direct', { durable: true });
     return channel;
   } catch (e) {
     throw e;
@@ -52,26 +52,26 @@ export async function CreateChannel(){
 }
 
 // Create Message
-export async function PublishMessage (channel, bindingKey, message){
+export async function PublishMessage (channel, service, message){
   try {
-    await channel.publish(config.EXCHANGE_NAME, bindingKey, Buffer.from(message));
+    await channel.publish(config.EXCHANGE_NAME, service, Buffer.from(message));
     console.log('Message has been sent ' + message)
   } catch (e) {
     throw e;
   }
 }
 
-// Subscribe to the messages
-export async function SubscribeMessage (channel, bindingKey){
-  const appQueue = await channel.assertQueue(config.QUEUE_NAME);
-
-  channel.bindQueue(appQueue.queue, config.EXCHANGE_NAME, bindingKey);
-
-  channel.consume(appQueue.queue, data => {
-    console.log(`Received message: ${data.content.toString()}`);
-    channel.ack(data);
-  })
-
-}
+// // Subscribe to the messages
+// export async function SubscribeMessage (channel, bindingKey){
+//   const appQueue = await channel.assertQueue(config.QUEUE_NAME);
+//
+//   channel.bindQueue(appQueue.queue, config.EXCHANGE_NAME, bindingKey);
+//
+//   channel.consume(appQueue.queue, data => {
+//     console.log(`Received message: ${data.content.toString()}`);
+//     channel.ack(data);
+//   })
+//
+// }
 
 

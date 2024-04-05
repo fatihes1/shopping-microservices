@@ -54,37 +54,39 @@ export function FormatData(data) {
 // Create a channel
 export async function CreateChannel(){
   try {
-    const connection = await amqplib.connect(config.MESSAGE_BROKER_URL)
+    const connection = await amqplib.connect(config.MSG_QUEUE_URL)
     const channel = await connection.createChannel()
-    await channel.assertExchange(config.EXCHANGE_NAME, 'direct', false);
+    await channel.assertExchange(config.EXCHANGE_NAME, 'direct', { durable: true });
     return channel;
   } catch (e) {
     throw e;
   }
 }
 
-// In Customer Service we do not need to publish events, so we will not use the following functions
-/*
-export const PublishMessage = async (channel, bindingKey, message) => {
+export const PublishMessage = async (channel, service, message) => {
   try {
-    await channel.publish(EXCHANGE_NAME, bindingKey, Buffer.from(message));
+    await channel.publish(config.EXCHANGE_NAME, service, Buffer.from(message));
   } catch (e) {
     throw e;
   }
 }
-*/
+
 
 // Subscribe to the messages
 export async function SubscribeMessage (channel, service) {
-  const appQueue = await channel.assertQueue(config.QUEUE_NAME);
+  await channel.assertExchange(config.EXCHANGE_NAME, 'direct', { durable: true });
+  const q = await channel.assertQueue('', { exclusive: true });
+  console.log(`Waiting for messages in ${q.queue}.`);
 
+  channel.bindQueue(q.queue, config.EXCHANGE_NAME, config.CUSTOMER_SERVICE);
 
-  channel.bindQueue(appQueue.queue, config.EXCHANGE_NAME, config.CUSTOMER_BINDING_KEY);
-
-  channel.consume(appQueue.queue, data => {
-    console.log(`Received message: ${data.content.toString()}`);
-    service.subscribeEvents(data.content.toString())
-    channel.ack(data);
-  })
+  channel.consume(q.queue, (message) => {
+    if (message.content) {
+      console.log(`Received message: ${message.content.toString()}`);
+      service.subscribeEvents(message.content.toString())
+      channel.ack(message);
+    }
+    console.log("[X] received");
+  }, { noAck: true })
 
 }

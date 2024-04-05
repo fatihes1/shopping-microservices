@@ -65,9 +65,9 @@ module.exports.PublishCustomerEvent = async (payload) => {
 // Create a channel
 export async function CreateChannel () {
   try {
-    const connection = await amqplib.connect(config.MESSAGE_BROKER_URL)
+    const connection = await amqplib.connect(config.MSG_QUEUE_URL)
     const channel = await connection.createChannel()
-    await channel.assertExchange(config.EXCHANGE_NAME, 'direct', false);
+    await channel.assertExchange(config.EXCHANGE_NAME, 'direct', { durable : true });
     return channel;
   } catch (e) {
     throw e;
@@ -75,9 +75,9 @@ export async function CreateChannel () {
 }
 
 // Create Message
-export async function PublishMessage (channel, bindingKey, message){
+export async function PublishMessage (channel, service, message){
   try {
-    await channel.publish(config.EXCHANGE_NAME, bindingKey, Buffer.from(message));
+    await channel.publish(config.EXCHANGE_NAME, service, Buffer.from(message));
     console.log('Message has been sent ' + message)
   } catch (e) {
     console.log('PUBLISH MESSAGE ERROR: ', e)
@@ -87,14 +87,19 @@ export async function PublishMessage (channel, bindingKey, message){
 
 // Subscribe to the messages
 export async function SubscribeMessage (channel, service){
-  const appQueue = await channel.assertQueue(config.QUEUE_NAME);
+  await channel.assertExchange(config.EXCHANGE_NAME, 'direct', { durable : true });
+  const appQueue = await channel.assertQueue("", { exclusive: true });
+    console.log(`Waiting for messages in ${appQueue.queue}`);
 
-  channel.bindQueue(appQueue.queue, config.EXCHANGE_NAME, config.SHOPPING_BINDING_KEY);
+  channel.bindQueue(appQueue.queue, config.EXCHANGE_NAME, config.SHOPPING_SERVICE);
 
   channel.consume(appQueue.queue, data => {
-    console.log(`Received message: ${data.content.toString()}`);
-    service.SubscribeEvents(data.content.toString());
-    channel.ack(data);
-  })
+    if (data.content) {
+      console.log(`Received message: ${data.content.toString()}`);
+      service.SubscribeEvents(data.content.toString());
+      channel.ack(data);
+    }
+    console.log('[X] received')
+  }, { noAck: false })
 
 }

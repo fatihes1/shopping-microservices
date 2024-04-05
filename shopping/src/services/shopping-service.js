@@ -8,7 +8,7 @@ class ShoppingService {
     this.repository = new ShoppingRepository();
   }
 
-  async GetCart ({ _id }){
+  async GetCart (_id){
       try {
         const cartItems = await this.repository.Cart(_id);
         return FormatData(cartItems);
@@ -45,6 +45,23 @@ class ShoppingService {
     return FormatData(cartResult);
   }
 
+  async AddToCart(customerId, productId, qty){
+    // Grab product info from product service through RPC
+    const productResponse = {}; // TODO: add RPC code here
+    if(productResponse && productResponse._id){
+      //
+    }
+
+    throw new Error('Product not found')
+
+    const cartResult = await this.repository.AddCartItem(customerId, productId, qty, false);
+    return FormatData(cartResult);
+  }
+
+  async RemoveFromCart(customerId, productId){
+    const cartResult = await this.repository.AddCartItem(customerId, productId );
+    return FormatData(cartResult);
+  }
 
   async SubscribeEvents(payload){
     payload = JSON.parse(payload);

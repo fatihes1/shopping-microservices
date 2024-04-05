@@ -70,7 +70,7 @@ export default async function (app, channel){
             // get payload to send customer service
             const { data } = await service.GerProductPayload(_id, { productId : req.body._id }, 'ADD_TO_WISHLIST');
             // PublishCustomerEvent(data);
-            await PublishMessage(channel, config.CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.CUSTOMER_SERVICE, JSON.stringify(data));
 
             return res.status(200).json(data.data.product);
         } catch (err) {
@@ -86,7 +86,7 @@ export default async function (app, channel){
         try {
             const { data } = await service.GerProductPayload(_id, { productId }, 'REMOVE_FROM_WISHLIST');
             //PublishCustomerEvent(data);
-            await PublishMessage(channel, config.CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.CUSTOMER_SERVICE, JSON.stringify(data));
 
             return res.status(200).json(data.data.product);
         } catch (err) {
@@ -102,10 +102,10 @@ export default async function (app, channel){
             const { data } = await service.GerProductPayload(_id, { productId: req.body._id, qty: req.body.qty }, 'ADD_TO_CART');
 
             //PublishCustomerEvent(data);
-            await PublishMessage(channel, config.CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.CUSTOMER_SERVICE, JSON.stringify(data));
 
             //PublishShoppingEvent(data);
-            await PublishMessage(channel, config.SHOPPING_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.SHOPPING_SERVICE, JSON.stringify(data));
 
 
             const response = {
@@ -128,10 +128,10 @@ export default async function (app, channel){
         try {
             const { data } = await service.GerProductPayload(_id, { productId: productId, qty: 1 }, 'REMOVE_FROM_CART');
             //PublishCustomerEvent(data);
-            await PublishMessage(channel, config.CUSTOMER_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.CUSTOMER_SERVICE, JSON.stringify(data));
 
             //PublishShoppingEvent(data);
-            await PublishMessage(channel, config.SHOPPING_BINDING_KEY, JSON.stringify(data));
+            await PublishMessage(channel, config.SHOPPING_SERVICE, JSON.stringify(data));
 
 
             const response = {
