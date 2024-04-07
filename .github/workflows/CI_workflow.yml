@@ -32,7 +32,7 @@ jobs:
         npm test     
 
     - name: Test Shopping Service
-      working-directory: ./Shopping
+      working-directory: ./shopping
       run: |
         npm ci
         npm test         
