@@ -128,6 +128,7 @@ class CustomerRepository {
     try {
       return await Customer.findByIdAndDelete(id);
     } catch (err) {
+      console.log('ERROR', err)
       throw new APIError(
           "API Error",
           STATUS_CODES.INTERNAL_ERROR,

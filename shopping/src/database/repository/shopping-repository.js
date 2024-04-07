@@ -1,4 +1,4 @@
-import {Cart, Order} from '../models/index.js';
+import {Cart, Order, Wishlist} from '../models/index.js';
 import {v4 as uuidv4} from 'uuid';
 import {APIError, STATUS_CODES} from "../../utils/app-errors.js";
 import loadash from 'lodash';
@@ -8,8 +8,11 @@ class ShoppingRepository {
 
     // payment
 
-    async Orders(customerId){
+    async Orders(customerId, orderId=null){
         try{
+            if(orderId){
+                return await Order.findOne({ _id: orderId });
+            }
             return await Order.find({customerId});
         }catch(err){
             throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Orders')
@@ -31,7 +34,7 @@ class ShoppingRepository {
 
     async ManageCart(customerId, product, qty, isRemove){
         const cart = await Cart.findOne({ customerId });
-
+        console.log('REPOSTIORY CART: ', cart, 'PRODUCT:', product, 'QTY:', qty, 'ISREMOVE:', isRemove)
         if (cart) {
             if (isRemove) {
                 cart.items = loadash.filter(
@@ -55,6 +58,7 @@ class ShoppingRepository {
             }
             return await cart.save();
         }  else {
+            console.log('CREATED CART HERE')
             return await Cart.create({
                 customerId,
                 items: [{
@@ -67,47 +71,40 @@ class ShoppingRepository {
     }
 
 
-    async ManageWishlist(customerId, product, qty, isRemove){
-        const cart = await Cart.findOne({ customerId });
+    async ManageWishlist(customerId, productId, isRemove = false){
+        const wishlist = await Wishlist.findOne({ customerId });
 
-        if (cart) {
+        if (wishlist) {
             if (isRemove) {
-                cart.items = loadash.filter(
-                    cart.items,
-                    (item) => item.product._id !== product._id
+                wishlist.products = loadash.filter(
+                    wishlist.products,
+                    (product) => product._id !== productId
                 );
             } else {
-                const cartIndex = loadash.findIndex(cart.items,
-                    { product: { _id: product._id }
-                    });
+                const wishlistIndex = loadash.findIndex(wishlist.products, { _id: productId });
 
-                if (cartIndex > -1) {
-                    // May be cart.items[cartIndex].unit += qty too
-                    cart.items[cartIndex].unit = qty;
-                } else {
-                    cart.items.push({
-                        product: { ...product },
-                        unit: qty
-                    })
+                if (wishlistIndex < 0) {
+                    wishlist.products.push({ _id: productId })
                 }
             }
-            return await cart.save();
+            return await wishlist.save();
         }  else {
-            return await Cart.create({
+            return await Wishlist.create({
                 customerId,
-                items: [{
-                    product,
-                    unit: qty
+                products: [{
+                    _id: productId,
                 }]
             })
         }
 
     }
 
+    async GetWishlistByCustomerId(customerId){
+        return Wishlist.findOne({customerId});
+    }
 
     async CreateNewOrder(customerId, txnId){
 
-        //required to verify payment through TxnId
         const cart = await Cart.findOne({ customerId: customerId })
         if(cart){
             let amount = 0;
@@ -137,6 +134,14 @@ class ShoppingRepository {
             }
         }
         return {}
+    }
+
+    async DeleteProfileData(customerId){
+        console.log('DELETING')
+        return await Promise.all([
+            Cart.findOneAndDelete({ customerId }),
+            Wishlist.findOneAndDelete({ customerId }),
+        ])
     }
 }
 

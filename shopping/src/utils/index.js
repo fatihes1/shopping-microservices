@@ -119,6 +119,7 @@ export async function SubscribeMessage (channel, service){
 }
 
 const requestData = async (RPC_QUEUE_NAME, requestPayload, uuid) => {
+  console.log('RPC Request Data: ', RPC_QUEUE_NAME, requestPayload, uuid)
   try {
     const channel = await getChannel();
 
@@ -134,7 +135,6 @@ const requestData = async (RPC_QUEUE_NAME, requestPayload, uuid) => {
     );
 
     return new Promise((resolve, reject) => {
-      // timeout n
       const timeout = setTimeout(() => {
         channel.close();
         resolve("API could not fulfill the request!");
@@ -146,7 +146,7 @@ const requestData = async (RPC_QUEUE_NAME, requestPayload, uuid) => {
               resolve(JSON.parse(msg.content.toString()));
               clearTimeout(timeout);
             } else {
-              reject("data Not found!");
+              reject("Data Not found!");
             }
           },
           {

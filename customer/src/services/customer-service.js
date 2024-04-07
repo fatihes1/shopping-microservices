@@ -98,8 +98,9 @@ class CustomerService {
                 event: 'DELETE_PROFILE',
                 data: { userId: id }
             }
-            return { deletedCustomer, payload };
+            return { data: deletedCustomer, payload };
         } catch (err) {
+            console.log('ERROR', err)
             throw new APIError('Data Not found', err);
         }
     }

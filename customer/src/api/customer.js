@@ -2,6 +2,7 @@ import CustomerService from "../services/customer-service.js";
 import { authMiddleware } from "./middlewares/auth.js";
 import { PublishMessage } from "../utils/index.js";
 import config from "../config/index.js";
+import {APIError} from "../utils/app-errors.js";
 
 export default async function setupCustomerRoutes(app, channel) {
   const service = new CustomerService();
@@ -119,10 +120,11 @@ export default async function setupCustomerRoutes(app, channel) {
 
       // Publish message to shopping service
       await PublishMessage(channel, config.SHOPPING_SERVICE, JSON.stringify(payload));
-
+      console.log('API: DATA:', data, ' PAYLOAD:', payload);
       return res.json(data);
     } catch (err) {
-      next(err);
+      console.log('API: ERROR:', err)
+      throw APIError('Data Not found', err);
     }
   });
 

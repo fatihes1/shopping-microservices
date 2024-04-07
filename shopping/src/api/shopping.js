@@ -29,12 +29,9 @@ export default async  function(app, channel){
         const { txnNumber } = req.body;
 
         try {
-            const { data } = await service.PlaceOrder({_id, txnNumber});
+            const { data } = await service.CreateOrder(_id, txnNumber);
 
             const payload = await service.GetOrderPayload(_id, data, 'CREATE_ORDER');
-
-            // PublishCustomerEvent(payload);
-            await PublishMessage(channel, config.CUSTOMER_SERVICE, JSON.stringify(payload));
 
             return res.status(200).json(data);
             
@@ -42,6 +39,17 @@ export default async  function(app, channel){
             next(err)
         }
 
+    });
+
+    app.get('/order/:id',authMiddleware, async (req,res,next) => {
+        const { _id } = req.user;
+        const orderId = req.params.id;
+        try {
+            const { data } = await service.GetOrder(_id, orderId);
+            return res.status(200).json(data);
+        } catch (err) {
+            next(err);
+        }
     });
 
     /**
@@ -61,6 +69,9 @@ export default async  function(app, channel){
             next(err);
         }
     });
+
+
+
 
 
     // WISHLIST
@@ -95,8 +106,12 @@ export default async  function(app, channel){
     app.get('/wishlist', authMiddleware, async (req,res,next) => {
         const { _id } = req.user;
         try {
-            const { data } = await service.GetWishlist(_id);
-            return res.status(200).json(data);
+            const response = await service.GetWishlist(_id);
+            if (response && response.data) {
+                const { data } = response;
+                return res.status(200).json(data);
+            }
+            return res.status(200).json({ data: [] });
         } catch (err) {
             next(err);
         }
@@ -135,7 +150,7 @@ export default async  function(app, channel){
     app.post('/cart', authMiddleware, async  (req, res, next) => {
             const { _id } = req.user;
             const { product_id: productId, qty: productQty } = req.body;
-
+            console.log('INSIDE CART API PRODUCT ID:', productId, 'QTY:', productQty, 'USER ID:', _id);
             try {
                 const { data } = await service.AddToCart(_id, productId, productQty);
                 return res.status(200).json(data);
@@ -153,7 +168,6 @@ export default async  function(app, channel){
      * @param {Function} next - The next middleware function.
      */
     app.delete('/cart/:id', authMiddleware, async  (req, res, next) => {
-
         const { _id } = req.user;
         const productId = req.params.id;
 
@@ -174,7 +188,6 @@ export default async  function(app, channel){
      * @param {Function} next - The next middleware function.
      */
     app.get('/cart', authMiddleware, async (req,res,next) => {
-
         const { _id } = req.user;
         try {
             const { data } = await service.GetCart(_id);
