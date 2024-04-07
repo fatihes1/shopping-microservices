@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 import amqplib from "amqplib";
+import { v4 as uuid4 } from "uuid";
+
 
 
 //Utility functions
@@ -62,11 +64,23 @@ module.exports.PublishCustomerEvent = async (payload) => {
 
 // Instead of using webhooks, we can use message broker like RabbitMQ or Kafka to publish events
 
+// MESSAGE BROKER
+
+
+let AMQPLIB_CONNECTION = null;
+
+const getChannel = async () => {
+  if (AMQPLIB_CONNECTION === null) {
+    AMQPLIB_CONNECTION = await amqplib.connect(config.MSG_QUEUE_URL);
+  }
+  return await AMQPLIB_CONNECTION.createChannel();
+};
+
+
 // Create a channel
 export async function CreateChannel () {
   try {
-    const connection = await amqplib.connect(config.MSG_QUEUE_URL)
-    const channel = await connection.createChannel()
+    const channel = await getChannel();
     await channel.assertExchange(config.EXCHANGE_NAME, 'direct', { durable : true });
     return channel;
   } catch (e) {
@@ -102,4 +116,51 @@ export async function SubscribeMessage (channel, service){
     console.log('[X] received')
   }, { noAck: false })
 
+}
+
+const requestData = async (RPC_QUEUE_NAME, requestPayload, uuid) => {
+  try {
+    const channel = await getChannel();
+
+    const q = await channel.assertQueue("", { exclusive: true });
+
+    channel.sendToQueue(
+        RPC_QUEUE_NAME,
+        Buffer.from(JSON.stringify(requestPayload)),
+        {
+          replyTo: q.queue,
+          correlationId: uuid,
+        }
+    );
+
+    return new Promise((resolve, reject) => {
+      // timeout n
+      const timeout = setTimeout(() => {
+        channel.close();
+        resolve("API could not fulfill the request!");
+      }, 8000);
+      channel.consume(
+          q.queue,
+          (msg) => {
+            if (msg.properties.correlationId === uuid) {
+              resolve(JSON.parse(msg.content.toString()));
+              clearTimeout(timeout);
+            } else {
+              reject("data Not found!");
+            }
+          },
+          {
+            noAck: true,
+          }
+      );
+    });
+  } catch (error) {
+    console.log(error);
+    return "error";
+  }
+};
+
+export async function  RPCRequest (RPC_QUEUE_NAME, requestPayload) {
+  const uuid = uuid4(); // correlationId
+  return await requestData(RPC_QUEUE_NAME, requestPayload, uuid);
 }

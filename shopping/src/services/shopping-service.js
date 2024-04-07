@@ -1,6 +1,6 @@
 import {ShoppingRepository} from "../database/index.js";
 import {APIError} from '../utils/app-errors.js';
-import {FormatData} from "../utils/index.js";
+import {FormatData, RPCRequest} from "../utils/index.js";
 
 // All Business logic will be here
 class ShoppingService {
@@ -19,9 +19,7 @@ class ShoppingService {
 
   async PlaceOrder(userInput) {
     const { _id, txnNumber } = userInput;
-
     // Verify the txn number with payment logs
-
     try {
       const orderResult = await this.repository.CreateNewOrder(_id, txnNumber);
       return FormatData(orderResult);
@@ -46,21 +44,35 @@ class ShoppingService {
   }
 
   async AddToCart(customerId, productId, qty){
-    // Grab product info from product service through RPC
-    const productResponse = {}; // TODO: add RPC code here
+    const productResponse = await RPCRequest('PRODUCT_RPC', { type: 'VIEW_PRODUCT', data: productId });
     if(productResponse && productResponse._id){
-      //
+      const data = await this.repository.ManageCart(customerId, productResponse, qty, false);
+      return FormatData(data);
     }
-
     throw new Error('Product not found')
-
-    const cartResult = await this.repository.AddCartItem(customerId, productId, qty, false);
-    return FormatData(cartResult);
   }
 
   async RemoveFromCart(customerId, productId){
-    const cartResult = await this.repository.AddCartItem(customerId, productId );
-    return FormatData(cartResult);
+    try {
+      const cartResult = await this.repository.ManageCart(customerId, { _id: productId }, 0, true);
+      return FormatData(cartResult);
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  // Wishlist
+
+  async AddToWishlist(customerId, productId){
+
+  }
+
+  async GetWishlist(customerId){
+
+  }
+
+  async RemoveFromWishlist(customerId, productId){
+
   }
 
   async SubscribeEvents(payload){

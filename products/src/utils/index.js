@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import config from "../config/index.js";
-
 import amqplib from "amqplib";
+import { v4 as uuid4 } from "uuid";
+
 //Utility functions
-
-
 export async function ValidateSignature (req){
   try {
     const signature = req.get("Authorization");
@@ -39,11 +38,20 @@ module.exports.PublishShoppingEvent = async (payload) => {
 
 // Instead of using webhooks, we can use message broker like RabbitMQ or Kafka to publish events
 
+// MESSAGE BROKER
+let AMQPLIB_CONNECTION = null;
+
+const getChannel = async () => {
+  if (AMQPLIB_CONNECTION === null) {
+    AMQPLIB_CONNECTION = await amqplib.connect(config.MSG_QUEUE_URL);
+  }
+  return await AMQPLIB_CONNECTION.createChannel();
+};
+
 // Create a channel
 export async function CreateChannel(){
   try {
-    const connection = await amqplib.connect(config.MSG_QUEUE_URL)
-    const channel = await connection.createChannel()
+    const channel = await getChannel();
     await channel.assertExchange(config.EXCHANGE_NAME, 'direct', { durable: true });
     return channel;
   } catch (e) {
@@ -61,17 +69,34 @@ export async function PublishMessage (channel, service, message){
   }
 }
 
-// // Subscribe to the messages
-// export async function SubscribeMessage (channel, bindingKey){
-//   const appQueue = await channel.assertQueue(config.QUEUE_NAME);
-//
-//   channel.bindQueue(appQueue.queue, config.EXCHANGE_NAME, bindingKey);
-//
-//   channel.consume(appQueue.queue, data => {
-//     console.log(`Received message: ${data.content.toString()}`);
-//     channel.ack(data);
-//   })
-//
-// }
+export async function RPCObserver (RPC_QUEUE_NAME, service){
+  const channel = await getChannel();
+  await channel.assertQueue(RPC_QUEUE_NAME, {
+    durable: false,
+  });
+  channel.prefetch(1);
+  channel.consume(
+      RPC_QUEUE_NAME,
+      async (msg) => {
+        if (msg.content) {
+          // DB Operation
+          const payload = JSON.parse(msg.content.toString());
+          const response = await service.serveRPCRequest(payload);
+
+          channel.sendToQueue(
+              msg.properties.replyTo,
+              Buffer.from(JSON.stringify(response)),
+              {
+                correlationId: msg.properties.correlationId,
+              }
+          );
+          channel.ack(msg);
+        }
+      },
+      {
+        noAck: false,
+      }
+  );
+}
 
 

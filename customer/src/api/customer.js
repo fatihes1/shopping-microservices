@@ -126,27 +126,6 @@ export default async function setupCustomerRoutes(app, channel) {
     }
   });
 
-  // app.get("/shopping-details", authMiddleware, async (req, res, next) => {
-  //   try {
-  //     const { _id } = req.user;
-  //     const { data } = await service.getShoppingDetails(_id);
-  //     return res.json(data);
-  //   } catch (err) {
-  //     next(err);
-  //   }
-  // });
-  //
-  // app.get("/wishlist", authMiddleware, async (req, res, next) => {
-  //   try {
-  //     const { _id } = req.user;
-  //     const { data } = await service.getWishList(_id);
-  //     return res.status(200).json(data);
-  //   } catch (err) {
-  //     next(err);
-  //   }
-  // });
-
-
   /**
    * GET /whoami
    * This endpoint returns a message indicating the service identity.
