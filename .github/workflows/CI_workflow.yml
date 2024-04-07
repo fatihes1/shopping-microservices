@@ -26,13 +26,13 @@ jobs:
         npm test
 
     - name: Test Product Service
-      working-directory: ./product
+      working-directory: ./products
       run: |
         npm ci
         npm test     
 
     - name: Test Shopping Service
-      working-directory: ./Shopping
+      working-directory: ./shopping
       run: |
         npm ci
         npm test         

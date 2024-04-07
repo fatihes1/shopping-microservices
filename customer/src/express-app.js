@@ -15,9 +15,6 @@ export default async function setupExpressApp(app, channel) {
     app.use(cors());
     app.use(express.static(__dirname + '/public'));
 
-    // listen to events
-    //appEvents(app); // We do not use webhooks anymore. We use RabbitMQ
-
     // API routes
     customer(app, channel);
 

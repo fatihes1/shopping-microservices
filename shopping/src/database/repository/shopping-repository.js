@@ -1,15 +1,18 @@
-import {Cart, Order} from '../models/index.js';
+import {Cart, Order, Wishlist} from '../models/index.js';
 import {v4 as uuidv4} from 'uuid';
 import {APIError, STATUS_CODES} from "../../utils/app-errors.js";
-
+import loadash from 'lodash';
 
 //Dealing with database operations
 class ShoppingRepository {
 
     // payment
 
-    async Orders(customerId){
+    async Orders(customerId, orderId=null){
         try{
+            if(orderId){
+                return await Order.findOne({ _id: orderId });
+            }
             return await Order.find({customerId});
         }catch(err){
             throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Orders')
@@ -18,11 +21,9 @@ class ShoppingRepository {
 
     async Cart(customerId) {
         try {
-            const cartItems = await Cart.find({
+            const cartItems = await Cart.findOne({
                 customerId: customerId
             })
-            console.log(cartItems)
-
             if (cartItems) {
                 return cartItems;
             }
@@ -31,46 +32,79 @@ class ShoppingRepository {
         }
     }
 
-    async AddCartItem(customerId,item,qty,isRemove){
+    async ManageCart(customerId, product, qty, isRemove){
+        const cart = await Cart.findOne({ customerId });
+        console.log('REPOSTIORY CART: ', cart, 'PRODUCT:', product, 'QTY:', qty, 'ISREMOVE:', isRemove)
+        if (cart) {
+            if (isRemove) {
+                cart.items = loadash.filter(
+                    cart.items,
+                    (item) => item.product._id !== product._id
+                );
+            } else {
+                const cartIndex = loadash.findIndex(cart.items,
+                    { product: { _id: product._id }
+                    });
 
-        const cart = await Cart.findOne({ customerId: customerId })
-        const { _id } = item;
-
-        if(cart){
-            let isExist = false;
-            let cartItems = cart.items;
-
-            if(cartItems.length > 0){
-                cartItems.map(item => {
-                    if(item.product._id.toString() === _id.toString()){
-                        if(isRemove){
-                            cartItems.splice(cartItems.indexOf(item), 1);
-                        }else{
-                            item.unit = qty;
-                        }
-                        isExist = true;
-                    }
-                });
+                if (cartIndex > -1) {
+                    // May be cart.items[cartIndex].unit += qty too
+                    cart.items[cartIndex].unit = qty;
+                } else {
+                    cart.items.push({
+                        product: { ...product },
+                        unit: qty
+                    })
+                }
             }
-
-            if(!isExist && !isRemove){
-                cartItems.push({product: { ...item}, unit: qty });
-            }
-            cart.items = cartItems;
-
-            return await cart.save()
-        }else{
+            return await cart.save();
+        }  else {
+            console.log('CREATED CART HERE')
             return await Cart.create({
                 customerId,
-                items:[{product: { ...item}, unit: qty }]
+                items: [{
+                    product,
+                    unit: qty
+                }]
             })
         }
+
     }
 
 
+    async ManageWishlist(customerId, productId, isRemove = false){
+        const wishlist = await Wishlist.findOne({ customerId });
+
+        if (wishlist) {
+            if (isRemove) {
+                wishlist.products = loadash.filter(
+                    wishlist.products,
+                    (product) => product._id !== productId
+                );
+            } else {
+                const wishlistIndex = loadash.findIndex(wishlist.products, { _id: productId });
+
+                if (wishlistIndex < 0) {
+                    wishlist.products.push({ _id: productId })
+                }
+            }
+            return await wishlist.save();
+        }  else {
+            return await Wishlist.create({
+                customerId,
+                products: [{
+                    _id: productId,
+                }]
+            })
+        }
+
+    }
+
+    async GetWishlistByCustomerId(customerId){
+        return Wishlist.findOne({customerId});
+    }
+
     async CreateNewOrder(customerId, txnId){
 
-        //required to verify payment through TxnId
         const cart = await Cart.findOne({ customerId: customerId })
         if(cart){
             let amount = 0;
@@ -100,6 +134,14 @@ class ShoppingRepository {
             }
         }
         return {}
+    }
+
+    async DeleteProfileData(customerId){
+        console.log('DELETING')
+        return await Promise.all([
+            Cart.findOneAndDelete({ customerId }),
+            Wishlist.findOneAndDelete({ customerId }),
+        ])
     }
 }
 

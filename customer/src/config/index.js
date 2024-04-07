@@ -14,10 +14,10 @@ const config = {
     PORT: process.env.PORT,
     DB_URL: process.env.MONGODB_URI,
     APP_SECRET: process.env.APP_SECRET,
-    MESSAGE_BROKER_URL: process.env.MESSAGE_BROKER_URL,
-    EXCHANGE_NAME: 'ONLINE_SHOPPING',
-    CUSTOMER_BINDING_KEY: 'CUSTOMER_SERVICE',
-    QUEUE_NAME: 'CUSTOMER_QUEUE'
+    EXCHANGE_NAME: process.env.EXCHANGE_NAME,
+    MSG_QUEUE_URL: process.env.MSG_QUEUE_URL,
+    CUSTOMER_SERVICE: "customer_service",
+    SHOPPING_SERVICE: "shopping_service",
 };
 
 

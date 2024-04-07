@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt'
 import jwt from "jsonwebtoken";
 import config from "../config/index.js";
 import amqplib from "amqplib";
+import { v4 as uuid4 } from "uuid";
+
 
 
 //Utility functions
@@ -62,12 +64,24 @@ module.exports.PublishCustomerEvent = async (payload) => {
 
 // Instead of using webhooks, we can use message broker like RabbitMQ or Kafka to publish events
 
+// MESSAGE BROKER
+
+
+let AMQPLIB_CONNECTION = null;
+
+const getChannel = async () => {
+  if (AMQPLIB_CONNECTION === null) {
+    AMQPLIB_CONNECTION = await amqplib.connect(config.MSG_QUEUE_URL);
+  }
+  return await AMQPLIB_CONNECTION.createChannel();
+};
+
+
 // Create a channel
 export async function CreateChannel () {
   try {
-    const connection = await amqplib.connect(config.MESSAGE_BROKER_URL)
-    const channel = await connection.createChannel()
-    await channel.assertExchange(config.EXCHANGE_NAME, 'direct', false);
+    const channel = await getChannel();
+    await channel.assertExchange(config.EXCHANGE_NAME, 'direct', { durable : true });
     return channel;
   } catch (e) {
     throw e;
@@ -75,9 +89,9 @@ export async function CreateChannel () {
 }
 
 // Create Message
-export async function PublishMessage (channel, bindingKey, message){
+export async function PublishMessage (channel, service, message){
   try {
-    await channel.publish(config.EXCHANGE_NAME, bindingKey, Buffer.from(message));
+    await channel.publish(config.EXCHANGE_NAME, service, Buffer.from(message));
     console.log('Message has been sent ' + message)
   } catch (e) {
     console.log('PUBLISH MESSAGE ERROR: ', e)
@@ -87,14 +101,66 @@ export async function PublishMessage (channel, bindingKey, message){
 
 // Subscribe to the messages
 export async function SubscribeMessage (channel, service){
-  const appQueue = await channel.assertQueue(config.QUEUE_NAME);
+  await channel.assertExchange(config.EXCHANGE_NAME, 'direct', { durable : true });
+  const appQueue = await channel.assertQueue("", { exclusive: true });
+    console.log(`Waiting for messages in ${appQueue.queue}`);
 
-  channel.bindQueue(appQueue.queue, config.EXCHANGE_NAME, config.SHOPPING_BINDING_KEY);
+  channel.bindQueue(appQueue.queue, config.EXCHANGE_NAME, config.SHOPPING_SERVICE);
 
   channel.consume(appQueue.queue, data => {
-    console.log(`Received message: ${data.content.toString()}`);
-    service.SubscribeEvents(data.content.toString());
-    channel.ack(data);
-  })
+    if (data.content) {
+      console.log(`Received message: ${data.content.toString()}`);
+      service.SubscribeEvents(data.content.toString());
+      channel.ack(data);
+    }
+    console.log('[X] received')
+  }, { noAck: false })
 
+}
+
+const requestData = async (RPC_QUEUE_NAME, requestPayload, uuid) => {
+  console.log('RPC Request Data: ', RPC_QUEUE_NAME, requestPayload, uuid)
+  try {
+    const channel = await getChannel();
+
+    const q = await channel.assertQueue("", { exclusive: true });
+
+    channel.sendToQueue(
+        RPC_QUEUE_NAME,
+        Buffer.from(JSON.stringify(requestPayload)),
+        {
+          replyTo: q.queue,
+          correlationId: uuid,
+        }
+    );
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        channel.close();
+        resolve("API could not fulfill the request!");
+      }, 8000);
+      channel.consume(
+          q.queue,
+          (msg) => {
+            if (msg.properties.correlationId === uuid) {
+              resolve(JSON.parse(msg.content.toString()));
+              clearTimeout(timeout);
+            } else {
+              reject("Data Not found!");
+            }
+          },
+          {
+            noAck: true,
+          }
+      );
+    });
+  } catch (error) {
+    console.log(error);
+    return "error";
+  }
+};
+
+export async function  RPCRequest (RPC_QUEUE_NAME, requestPayload) {
+  const uuid = uuid4(); // correlationId
+  return await requestData(RPC_QUEUE_NAME, requestPayload, uuid);
 }
