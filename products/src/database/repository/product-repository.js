@@ -41,8 +41,6 @@ class ProductRepository {
       return await product.save();
     } catch (err) {
       throw new APIError(
-        "API Error",
-        STATUS_CODES.INTERNAL_ERROR,
         "Unable to Create Product"
       );
     }
@@ -59,8 +57,6 @@ class ProductRepository {
       return await Product.find();
     } catch (err) {
       throw new APIError(
-        "API Error",
-        STATUS_CODES.INTERNAL_ERROR,
         "Unable to Get Products"
       );
     }
@@ -78,8 +74,6 @@ class ProductRepository {
       return await Product.findById(id);
     } catch (err) {
       throw new APIError(
-        "API Error",
-        STATUS_CODES.INTERNAL_ERROR,
         "Unable to Find Product"
       );
     }
@@ -94,12 +88,9 @@ class ProductRepository {
    */
   async FindByCategory(category) {
     try {
-      const products = await Product.find({ type: category });
-      return products;
+      return await Product.find({type: category});
     } catch (err) {
       throw new APIError(
-        "API Error",
-        STATUS_CODES.INTERNAL_ERROR,
         "Unable to Find Category"
       );
     }
@@ -120,8 +111,6 @@ class ProductRepository {
           .exec();
     } catch (err) {
       throw new APIError(
-        "API Error",
-        STATUS_CODES.INTERNAL_ERROR,
         "Unable to Find Product"
       );
     }

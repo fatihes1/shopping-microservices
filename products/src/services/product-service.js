@@ -1,6 +1,6 @@
 import {ProductRepository} from "../database/index.js";
 import { FormatData } from "../utils/index.js";
-import { APIError } from '../utils/app-errors.js';
+import {APIError, NotFoundError} from '../utils/app-errors.js';
 
 
 // All Business logic will be here
@@ -22,12 +22,8 @@ class ProductService {
      * @throws {APIError} When there is an error creating the product.
      */
     async CreateProduct(productInputs){
-        try{
-            const productResult = await this.repository.CreateProduct(productInputs)
-            return FormatData(productResult);
-        }catch(err){
-            throw new APIError('Data Not found')
-        }
+        const productResult = await this.repository.CreateProduct(productInputs)
+        return FormatData(productResult);
     }
 
     /**
@@ -37,23 +33,11 @@ class ProductService {
      * @throws {APIError} When there is an error retrieving the products.
      */
     async GetProducts(){
-        try{
-            const products = await this.repository.Products();
-    
-            let categories = {};
-    
-            products.map(({ type }) => {
-                categories[type] = type;
-            });
-            
-            return FormatData({
-                products,
-                categories:  Object.keys(categories) ,
-            })
-
-        }catch(err){
-            throw new APIError('Data Not found')
-        }
+        const products = await this.repository.Products();
+        if (!products) throw new NotFoundError('There is no product available.')
+        let categories = {};
+        products.map(({ type }) => {categories[type] = type;});
+        return FormatData({products, categories:  Object.keys(categories) ,})
     }
 
     /**
@@ -64,12 +48,10 @@ class ProductService {
      * @throws {APIError} When there is an error retrieving the product.
      */
     async GetProductDescription(productId){
-        try {
-            const product = await this.repository.FindById(productId);
-            return FormatData(product)
-        } catch (err) {
-            throw new APIError('Data Not found')
-        }
+
+       const product = await this.repository.FindById(productId);
+       if (!product) throw new NotFoundError('Product not found')
+       return FormatData(product)
     }
 
     /**
@@ -80,13 +62,10 @@ class ProductService {
      * @throws {APIError} When there is an error retrieving the products.
      */
     async GetProductsByCategory(category){
-        try {
-            const products = await this.repository.FindByCategory(category);
-            return FormatData(products)
-        } catch (err) {
-            throw new APIError('Data Not found')
-        }
 
+        const products = await this.repository.FindByCategory(category);
+        if (!products) throw new NotFoundError('No product available in this category')
+        return FormatData(products)
     }
 
     /**
@@ -97,12 +76,11 @@ class ProductService {
      * @throws {APIError} When there is an error retrieving the products.
      */
     async GetSelectedProducts(selectedIds){
-        try {
-            const products = await this.repository.FindSelectedProducts(selectedIds);
-            return FormatData(products);
-        } catch (err) {
-            throw new APIError('Data Not found')
-        }
+
+       const products = await this.repository.FindSelectedProducts(selectedIds);
+         if (!products) throw new NotFoundError('No product available')
+       return FormatData(products);
+
     }
 
     /**
@@ -113,11 +91,7 @@ class ProductService {
      * @throws {APIError} When there is an error retrieving the product.
      */
     async GetProductById(productId){
-        try {
-            return await this.repository.FindById(productId);
-        } catch (err) {
-            throw new APIError('Data Not found')
-        }
+        return await this.repository.FindById(productId);
     }
 
     /**
@@ -131,18 +105,16 @@ class ProductService {
      * @returns {Promise<Object>} The generated payload.
      */
     async GerProductPayload(userId, { productId, qty }, event){
-            console.log('GerProductPayload', productId, qty, event, userId)
-            const product = await this.GetProductById(productId);
-        console.log('GerProductPayload', product)
-            if (product) {
-                const payload = {
-                    event: event,
-                    data: { userId, product, qty }
-                }
-                return FormatData(payload);
-            } else {
-                return FormatData({ error: "No product available" })
-            }
+
+       const product = await this.GetProductById(productId);
+
+       if (!product) throw new NotFoundError('Product not found')
+
+       const payload = {
+           event: event,
+           data: { userId, product, qty }
+       }
+       return FormatData(payload);
     }
 
     /**

@@ -13,6 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sentry/node": "^7.109.0",
+    "@sentry/profiling-node": "^7.109.0",
     "amqplib": "^0.10.3",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",

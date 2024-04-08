@@ -1,5 +1,5 @@
 import { createLogger, transports } from 'winston';
-import { AppError } from './app-errors.js';
+import { BaseError } from './app-errors.js';
 
 const logErrors = createLogger({
     transports: [
@@ -23,7 +23,7 @@ class ErrorLogger {
     }
 
     isTrustError(error) {
-        return error instanceof AppError && error.isOperational;
+        return error instanceof BaseError && error.isOperational;
     }
 }
 

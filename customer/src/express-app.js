@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import { customer } from './api/index.js'; // Adjust the path accordingly
-import HandleErrors from './utils/error-handler.js'; // Adjust the path accordingly
 
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +17,4 @@ export default async function setupExpressApp(app, channel) {
     // API routes
     customer(app, channel);
 
-    // Error handling
-    app.use(HandleErrors);
 }

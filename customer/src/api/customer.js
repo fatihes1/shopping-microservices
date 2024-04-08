@@ -7,8 +7,6 @@ import {APIError} from "../utils/app-errors.js";
 export default async function setupCustomerRoutes(app, channel) {
   const service = new CustomerService();
 
-  // await SubscribeMessage(channel, service)
-
   /**
    * POST /signup
    * This endpoint allows a new user to sign up.
@@ -66,7 +64,6 @@ export default async function setupCustomerRoutes(app, channel) {
   app.post("/address", authMiddleware, async (req, res, next) => {
     try {
       const { _id } = req.user;
-      console.log('ADDRESS CUSTOMERJS', _id,)
       const { street, postalCode, city, country } = req.body;
       const { data } = await service.addNewAddress(_id, {
         street,
