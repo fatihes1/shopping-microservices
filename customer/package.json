@@ -7,7 +7,8 @@
   "scripts": {
     "start": "NODE_ENV=prod node src/index.js",
     "start:dev": "NODE_ENV=dev nodemon src/index.js",
-    "test": "jest"
+    "test": "jest",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -28,6 +29,7 @@
     "winston": "^3.12.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5"
   }
 }

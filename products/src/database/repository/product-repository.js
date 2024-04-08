@@ -1,5 +1,5 @@
-import {Product} from "../models/index.js";
-import {APIError, STATUS_CODES} from "../../utils/app-errors.js";
+import { Product } from '../models/index.js';
+import { APIError, STATUS_CODES } from '../../utils/app-errors.js';
 
 /**
  * Serves RPC requests.
@@ -8,7 +8,6 @@ import {APIError, STATUS_CODES} from "../../utils/app-errors.js";
  * @returns {Promise<Object>} The response to the RPC request.
  */
 class ProductRepository {
-
   /**
    * Creates a new product.
    *
@@ -16,16 +15,7 @@ class ProductRepository {
    * @returns {Promise<Object>} The created product object.
    * @throws {APIError} When there is an error creating the product.
    */
-  async CreateProduct({
-    name,
-    desc,
-    type,
-    unit,
-    price,
-    available,
-    suplier,
-    banner,
-  }) {
+  async CreateProduct({ name, desc, type, unit, price, available, suplier, banner }) {
     try {
       const product = new Product({
         name,
@@ -40,9 +30,7 @@ class ProductRepository {
 
       return await product.save();
     } catch (err) {
-      throw new APIError(
-        "Unable to Create Product"
-      );
+      throw new APIError('Unable to Create Product');
     }
   }
 
@@ -56,9 +44,7 @@ class ProductRepository {
     try {
       return await Product.find();
     } catch (err) {
-      throw new APIError(
-        "Unable to Get Products"
-      );
+      throw new APIError('Unable to Get Products');
     }
   }
 
@@ -73,9 +59,7 @@ class ProductRepository {
     try {
       return await Product.findById(id);
     } catch (err) {
-      throw new APIError(
-        "Unable to Find Product"
-      );
+      throw new APIError('Unable to Find Product');
     }
   }
 
@@ -88,11 +72,9 @@ class ProductRepository {
    */
   async FindByCategory(category) {
     try {
-      return await Product.find({type: category});
+      return await Product.find({ type: category });
     } catch (err) {
-      throw new APIError(
-        "Unable to Find Category"
-      );
+      throw new APIError('Unable to Find Category');
     }
   }
 
@@ -106,13 +88,11 @@ class ProductRepository {
   async FindSelectedProducts(selectedIds) {
     try {
       return await Product.find()
-          .where("_id")
-          .in(selectedIds.map((_id) => _id))
-          .exec();
+        .where('_id')
+        .in(selectedIds.map((_id) => _id))
+        .exec();
     } catch (err) {
-      throw new APIError(
-        "Unable to Find Product"
-      );
+      throw new APIError('Unable to Find Product');
     }
   }
 }
