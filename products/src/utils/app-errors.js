@@ -6,62 +6,47 @@ const STATUS_CODES = {
   INTERNAL_ERROR: 500,
 };
 
-class AppError extends Error {
+class BaseError extends Error {
   constructor(
       name,
       statusCode,
       description,
-      isOperational,
-      errorStack,
-      logingErrorResponse
   ) {
     super(description);
+    Object.setPrototypeOf(this, new.target.prototype);
     this.name = name;
     this.statusCode = statusCode;
-    this.isOperational = isOperational;
-    this.errorStack = errorStack;
-    this.logError = logingErrorResponse;
     Error.captureStackTrace(this);
   }
 }
 
 //api Specific Errors
-class APIError extends AppError {
-  constructor(
-      name,
-      statusCode = STATUS_CODES.INTERNAL_ERROR,
-      description = "Internal Server Error",
-      isOperational = true
-  ) {
-    super(name, statusCode, description, isOperational);
+class APIError extends BaseError {
+  constructor(description = "API Error") {
+    super("API Internal Error", STATUS_CODES.INTERNAL_ERROR, description);
   }
 }
+
 
 //400
-class BadRequestError extends AppError {
-  constructor(description = "Bad request", logingErrorResponse) {
-    super(
-        "NOT FOUND",
-        STATUS_CODES.BAD_REQUEST,
-        description,
-        true,
-        false,
-        logingErrorResponse
-    );
+class ValidationError extends BaseError {
+  constructor(description = "Validation Error") {
+    super("VALIDATION ERROR", STATUS_CODES.BAD_REQUEST, description);
   }
 }
 
-//400
-class ValidationError extends AppError {
-  constructor(description = "Validation Error", errorStack) {
-    super(
-        "BAD REQUEST",
-        STATUS_CODES.BAD_REQUEST,
-        description,
-        true,
-        errorStack
-    );
+//403
+class AuthorizationError extends BaseError {
+  constructor(description = "Authorization Error") {
+    super("Authorization Error", STATUS_CODES.UN_AUTHORISED, description);
   }
 }
 
-export { AppError, APIError, BadRequestError, ValidationError, STATUS_CODES };
+//404
+class NotFoundError extends BaseError {
+  constructor(description = "Not Found Error") {
+    super("Not Found Error", STATUS_CODES.NOT_FOUND, description);
+  }
+}
+
+export { BaseError, APIError, ValidationError, NotFoundError, AuthorizationError, STATUS_CODES };

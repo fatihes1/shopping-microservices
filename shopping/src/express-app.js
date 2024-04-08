@@ -16,14 +16,6 @@ export default async function (app, channel){
     app.use(cors());
     app.use(express.static(__dirname + '/public'))
 
-    // listeners
-    //appEvents(app);
-
     //api
     await shopping(app, channel);
-
-
-    // error handling
-    app.use(HandleErrors);
-    
 }

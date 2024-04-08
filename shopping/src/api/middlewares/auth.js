@@ -1,4 +1,5 @@
 import { ValidateSignature } from '../../utils/index.js';
+import {AuthorizationError} from "../../utils/app-errors.js";
 
 export const authMiddleware = async (req, res, next) => {
     try {
@@ -6,11 +7,10 @@ export const authMiddleware = async (req, res, next) => {
 
         if (isAuthorized) {
             return next();
-        } else {
-            return res.status(403).json({ message: 'Not Authorized' });
         }
+        throw new AuthorizationError('User not authorized');
     } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' });
+        next(error);
     }
 };
 

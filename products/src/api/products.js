@@ -21,13 +21,10 @@ export default async function (app, channel){
      * @returns {Object} The data returned from the CreateProduct service method.
      */
     app.post('/product/create', async(req,res,next) => {
-        
         try {
-            const { name, desc, type, unit,price, available, suplier, banner } = req.body; 
-            // validation
+            const { name, desc, type, unit,price, available, suplier, banner } = req.body;
             const { data } =  await service.CreateProduct({ name, desc, type, unit,price, available, suplier, banner });
             return res.json(data);
-            
         } catch (err) {
             next(err)    
         }

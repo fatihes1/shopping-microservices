@@ -10,6 +10,7 @@ app.use('/', (req, res, next) => {
     })
 })
 
+
 app.listen(8006, () => {
     console.log('Products API running on port 8006');
 })

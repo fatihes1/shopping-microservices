@@ -1,6 +1,6 @@
 import {Cart, Order, Wishlist} from '../models/index.js';
 import {v4 as uuidv4} from 'uuid';
-import {APIError, STATUS_CODES} from "../../utils/app-errors.js";
+import {APIError} from "../../utils/app-errors.js";
 import loadash from 'lodash';
 
 //Dealing with database operations
@@ -15,11 +15,12 @@ class ShoppingRepository {
             }
             return await Order.find({customerId});
         }catch(err){
-            throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Orders')
+            throw APIError('Unable to Find Orders')
         }
     }
 
     async Cart(customerId) {
+        console.log('CHECKING LOG')
         try {
             const cartItems = await Cart.findOne({
                 customerId: customerId

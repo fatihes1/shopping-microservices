@@ -1,6 +1,6 @@
 import { CustomerRepository } from "../database/index.js";
 import { FormatData, GeneratePassword, GenerateSalt, GenerateSignature, ValidatePassword } from '../utils/index.js';
-import { APIError } from '../utils/app-errors.js';
+import {APIError, NotFoundError, ValidationError} from '../utils/app-errors.js';
 
 class CustomerService {
     constructor() {
@@ -16,23 +16,20 @@ class CustomerService {
      */
     async signIn(userInputs) {
         const { email, password } = userInputs;
-        try {
             const existingCustomer = await this.repository.findCustomer({ email });
 
-            if (existingCustomer) {
-                const validPassword = await ValidatePassword(password, existingCustomer.password, existingCustomer.salt);
-
-                if (validPassword) {
-                    const token = await GenerateSignature({ email: existingCustomer.email, _id: existingCustomer._id });
-                    return FormatData({ id: existingCustomer._id, token });
-                }
+            if (!existingCustomer) {
+                throw new NotFoundError('User not found with provided credentials')
             }
 
-            return FormatData(null);
+            const validPassword = await ValidatePassword(password, existingCustomer.password, existingCustomer.salt);
 
-        } catch (err) {
-            throw new APIError('Data Not found', err);
-        }
+            if (!validPassword) {
+                throw new ValidationError('User not found with provided credentials');
+            }
+
+            const token = await GenerateSignature({ email: existingCustomer.email, _id: existingCustomer._id });
+            return FormatData({ id: existingCustomer._id, token });
     }
 
     /**
@@ -47,16 +44,11 @@ class CustomerService {
      */
     async signUp(userInputs) {
         const { email, password, phone } = userInputs;
-        try {
-            let salt = await GenerateSalt();
-            let userPassword = await GeneratePassword(password, salt);
-            const existingCustomer = await this.repository.createCustomer({ email, password: userPassword, phone, salt });
-            const token = await GenerateSignature({ email, _id: existingCustomer._id });
-            return FormatData({ id: existingCustomer._id, token });
-
-        } catch (err) {
-            throw new APIError('Data Not found', err);
-        }
+        let salt = await GenerateSalt();
+        let userPassword = await GeneratePassword(password, salt);
+        const existingCustomer = await this.repository.createCustomer({ email, password: userPassword, phone, salt });
+        const token = await GenerateSignature({ email, _id: existingCustomer._id });
+        return FormatData({ id: existingCustomer._id, token });
     }
 
     /**
@@ -73,36 +65,25 @@ class CustomerService {
      */
     async addNewAddress(_id, userInputs) {
         const { street, postalCode, city, country } = userInputs;
-        try {
-            const addressResult = await this.repository.createAddress({ _id, street, postalCode, city, country });
-            return FormatData(addressResult);
-
-        } catch (err) {
-            throw new APIError('Data Not found', err);
-        }
+        const addressResult = await this.repository.createAddress({ _id, street, postalCode, city, country });
+        return FormatData(addressResult);
     }
 
     async getProfile(id) {
-        try {
-            const existingCustomer = await this.repository.findCustomerById({ id });
-            return FormatData(existingCustomer);
-        } catch (err) {
-            throw new APIError('Data Not found', err);
+        const existingCustomer = await this.repository.findCustomerById({ id });
+        if (!existingCustomer) {
+            throw new NotFoundError('User not found')
         }
+        return FormatData(existingCustomer);
     }
 
     async deleteProfile(id) {
-        try {
-            const deletedCustomer = await this.repository.deleteCustomerById({ id });
-            const payload = {
-                event: 'DELETE_PROFILE',
-                data: { userId: id }
-            }
-            return { data: deletedCustomer, payload };
-        } catch (err) {
-            console.log('ERROR', err)
-            throw new APIError('Data Not found', err);
+        const deletedCustomer = await this.repository.deleteCustomerById({ id });
+        const payload = {
+            event: 'DELETE_PROFILE',
+            data: { userId: id }
         }
+        return { data: deletedCustomer, payload };
     }
 
 }
