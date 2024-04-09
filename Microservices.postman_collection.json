@@ -1,0 +1,406 @@
+{
+	"info": {
+		"_postman_id": "872e47d5-764b-4087-a73e-8ac9e612769c",
+		"name": "Microservices",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "26799747",
+		"_collection_link": "https://takasla-unique-name.postman.co/workspace/Takasla~dc3e63ca-42df-4e59-9d7f-9aead1fa9a82/collection/26799747-872e47d5-764b-4087-a73e-8ac9e612769c?action=share&source=collection_link&creator=26799747"
+	},
+	"item": [
+		{
+			"name": "Customer",
+			"item": [
+				{
+					"name": "Signup",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"pm.collectionVariables.set(\"TOKEN\", jsonData.token)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"hello1@fatihes.com\",\n    \"password\":\"12345\",\n    \"phone\":\"05555555555\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{CUSTOMER_SERVICE}}/signup"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"pm.collectionVariables.set(\"TOKEN\", jsonData.token)"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"hello1@fatihes.com\",\n    \"password\":\"12345\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{CUSTOMER_SERVICE}}/login"
+					},
+					"response": []
+				},
+				{
+					"name": "Profile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{CUSTOMER_SERVICE}}/profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Profile",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{CUSTOMER_SERVICE}}/profile"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Adress",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"street\": \"Test Sk.\", \n   \"postalCode\":\"06000\", \n   \"city\":\"Ankara\",\n   \"country\":\"Turkey\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{CUSTOMER_SERVICE}}/address"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"Orange\",\n    \"desc\":\"Fresh fruit\",\n    \"type\":\"fruit\",\n    \"banner\":\"https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Red_Apple.jpg/1200px-Red_Apple.jpg\",\n    \"unit\":1,\n    \"price\":12, \n    \"available\":true,\n    \"suplier\":\"Golden Fruit & Vegatable Company\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{PRODUCT_SERVICE}}/product/create"
+					},
+					"response": []
+				},
+				{
+					"name": "Selected Products",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ids\":[\n        \"661542b565742ffac9c17bbe\",\n        \"661542b565742ffac9c17bbf\"\n    ]    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{PRODUCT_SERVICE}}/ids"
+					},
+					"response": []
+				},
+				{
+					"name": "Product's Categories",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{PRODUCT_SERVICE}}/category/Sebze"
+					},
+					"response": []
+				},
+				{
+					"name": "All Products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{PRODUCT_SERVICE}}/"
+					},
+					"response": []
+				},
+				{
+					"name": "Product Detail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{PRODUCT_SERVICE}}/661542b565742ffac9c17bbf"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Shopping",
+			"item": [
+				{
+					"name": "Show Cart",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": "{{SHOPPING_SERVICE}}/cart"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Product To Cart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\" : \"661542b565742ffac9c17bbe\",\n    \"qty\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{SHOPPING_SERVICE}}/cart"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Product From Cart",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\" : \"6611d92fba6863b9a4197b83\",\n    \"qty\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{SHOPPING_SERVICE}}/cart/6611d92fba6863b9a4197b83"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"txnId\": \"X3Y2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{SHOPPING_SERVICE}}/order"
+					},
+					"response": []
+				},
+				{
+					"name": "Customer's Orders",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{SHOPPING_SERVICE}}/orders"
+					},
+					"response": []
+				},
+				{
+					"name": "Add Product To Wishlist",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\": \"661542b565742ffac9c17bbe\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{SHOPPING_SERVICE}}/wishlist"
+					},
+					"response": []
+				},
+				{
+					"name": "Remove From Wishlist",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{SHOPPING_SERVICE}}/wishlist/661542b565742ffac9c17bbe"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Wishlist",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\": \"6612de9415afeb5036f47479\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{SHOPPING_SERVICE}}/wishlist"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "{{TOKEN}}"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "PRODUCT_SERVICE",
+			"value": "http://localhost:8006",
+			"type": "string"
+		},
+		{
+			"key": "CUSTOMER_SERVICE",
+			"value": "http://localhost:8005",
+			"type": "string"
+		},
+		{
+			"key": "SHOPPING_SERVICE",
+			"value": "http://localhost:8007",
+			"type": "string"
+		},
+		{
+			"key": "TOKEN",
+			"value": "-"
+		}
+	]
+}
