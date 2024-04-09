@@ -36,6 +36,8 @@ Her servis, aşağıdaki NPM paketlerini kullanmaktadır:
 - mongoose
 - uuid
 - winston
+- @sentry/node
+- @sentry/profiling-node
 
 ## Çalıştırma Adımları
 
