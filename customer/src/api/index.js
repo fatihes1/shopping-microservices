@@ -1,5 +1,3 @@
-import customer from './customer.js'
+import customer from './customer.js';
 
-export {
-    customer,
-}
+export { customer };

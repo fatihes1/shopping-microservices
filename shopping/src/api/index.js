@@ -1,3 +1,3 @@
-import shopping from "./shopping.js";
+import shopping from './shopping.js';
 
 export { shopping };

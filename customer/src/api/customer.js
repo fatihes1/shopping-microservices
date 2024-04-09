@@ -1,8 +1,8 @@
-import CustomerService from "../services/customer-service.js";
-import { authMiddleware } from "./middlewares/auth.js";
-import { PublishMessage } from "../utils/index.js";
-import config from "../config/index.js";
-import {APIError} from "../utils/app-errors.js";
+import CustomerService from '../services/customer-service.js';
+import { authMiddleware } from './middlewares/auth.js';
+import { PublishMessage } from '../utils/index.js';
+import config from '../config/index.js';
+import { APIError } from '../utils/app-errors.js';
 
 export default async function setupCustomerRoutes(app, channel) {
   const service = new CustomerService();
@@ -18,7 +18,7 @@ export default async function setupCustomerRoutes(app, channel) {
    *
    * @returns {Object} The data returned from the signUp service method.
    */
-  app.post("/signup", async (req, res, next) => {
+  app.post('/signup', async (req, res, next) => {
     try {
       const { email, password, phone } = req.body;
       const { data } = await service.signUp({ email, password, phone });
@@ -39,7 +39,7 @@ export default async function setupCustomerRoutes(app, channel) {
    *
    * @returns {Object} The data returned from the signIn service method.
    */
-  app.post("/login", async (req, res, next) => {
+  app.post('/login', async (req, res, next) => {
     try {
       const { email, password } = req.body;
       const { data } = await service.signIn({ email, password });
@@ -61,7 +61,7 @@ export default async function setupCustomerRoutes(app, channel) {
    *
    * @returns {Object} The data returned from the addNewAddress service method.
    */
-  app.post("/address", authMiddleware, async (req, res, next) => {
+  app.post('/address', authMiddleware, async (req, res, next) => {
     try {
       const { _id } = req.user;
       const { street, postalCode, city, country } = req.body;
@@ -89,7 +89,7 @@ export default async function setupCustomerRoutes(app, channel) {
    *
    * @returns {Object} The profile of the authenticated user.
    */
-  app.get("/profile", authMiddleware, async (req, res, next) => {
+  app.get('/profile', authMiddleware, async (req, res, next) => {
     try {
       const { _id } = req.user;
       const { data } = await service.getProfile(_id);
@@ -110,17 +110,15 @@ export default async function setupCustomerRoutes(app, channel) {
    *
    * @returns {Object} The data returned from the deleteProfile service method.
    */
-  app.delete("/profile", authMiddleware, async (req, res, next) => {
+  app.delete('/profile', authMiddleware, async (req, res) => {
     try {
       const { _id } = req.user;
       const { data, payload } = await service.deleteProfile(_id);
 
       // Publish message to shopping service
       await PublishMessage(channel, config.SHOPPING_SERVICE, JSON.stringify(payload));
-      console.log('API: DATA:', data, ' PAYLOAD:', payload);
       return res.json(data);
     } catch (err) {
-      console.log('API: ERROR:', err)
       throw APIError('Data Not found', err);
     }
   });
@@ -136,9 +134,9 @@ export default async function setupCustomerRoutes(app, channel) {
    *
    * @returns {Object} A JSON object containing a message about the service identity.
    */
-  app.get("/whoami", (req, res, next) => {
-    return res.status(200).json({
-      msg: '/customer: I am a customer service'
-    })
-  })
+  app.get('/whoami', (req, res) =>
+    res.status(200).json({
+      msg: '/customer: I am a customer service',
+    }),
+  );
 }

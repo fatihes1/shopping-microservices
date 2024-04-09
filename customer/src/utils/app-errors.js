@@ -7,11 +7,7 @@ const STATUS_CODES = {
 };
 
 class BaseError extends Error {
-  constructor(
-      name,
-      statusCode,
-      description,
-  ) {
+  constructor(name, statusCode, description) {
     super(description);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = name;
@@ -20,33 +16,32 @@ class BaseError extends Error {
   }
 }
 
-//api Specific Errors
+// api Specific Errors
 class APIError extends BaseError {
-  constructor(description = "API Error") {
-    super("API Internal Error", STATUS_CODES.INTERNAL_ERROR, description);
+  constructor(description = 'API Error') {
+    super('API Internal Error', STATUS_CODES.INTERNAL_ERROR, description);
   }
 }
 
-
-//400
+// 400
 class ValidationError extends BaseError {
-    constructor(description = "Validation Error") {
-        super("VALIDATION ERROR", STATUS_CODES.BAD_REQUEST, description);
-    }
+  constructor(description = 'Validation Error') {
+    super('VALIDATION ERROR', STATUS_CODES.BAD_REQUEST, description);
+  }
 }
 
-//403
+// 403
 class AuthorizationError extends BaseError {
-    constructor(description = "Authorization Error") {
-        super("Authorization Error", STATUS_CODES.UN_AUTHORISED, description);
-    }
+  constructor(description = 'Authorization Error') {
+    super('Authorization Error', STATUS_CODES.UN_AUTHORISED, description);
+  }
 }
 
-//404
+// 404
 class NotFoundError extends BaseError {
-    constructor(description = "Not Found Error") {
-        super("Not Found Error", STATUS_CODES.NOT_FOUND, description);
-    }
+  constructor(description = 'Not Found Error') {
+    super('Not Found Error', STATUS_CODES.NOT_FOUND, description);
+  }
 }
 
 export { BaseError, APIError, ValidationError, NotFoundError, AuthorizationError, STATUS_CODES };

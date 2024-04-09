@@ -1,8 +1,7 @@
-import {Address, Customer} from "../models/index.js";
-import {APIError, STATUS_CODES} from "../../utils/app-errors.js";
+import { Address, Customer } from '../models/index.js';
+import { APIError } from '../../utils/app-errors.js';
 
 class CustomerRepository {
-
   /**
    * Creates a new customer.
    *
@@ -25,7 +24,7 @@ class CustomerRepository {
       });
       return await customer.save();
     } catch (err) {
-      throw new APIError("Unable to Create Customer");
+      throw new APIError('Unable to Create Customer');
     }
   }
 
@@ -42,8 +41,6 @@ class CustomerRepository {
    * @throws {APIError} When there is an error creating the address.
    */
   async createAddress({ _id, street, postalCode, city, country }) {
-    const profile = await Customer.findById(_id);
-
     try {
       const profile = await Customer.findById(_id);
 
@@ -62,9 +59,7 @@ class CustomerRepository {
 
       return await profile.save();
     } catch (err) {
-      throw new APIError(
-          "Error on Create Address"
-      );
+      throw new APIError('Error on Create Address');
     }
   }
 
@@ -78,11 +73,9 @@ class CustomerRepository {
    */
   async findCustomer({ email }) {
     try {
-      return await Customer.findOne({email});
+      return await Customer.findOne({ email });
     } catch (err) {
-      throw new APIError(
-          "Unable to Find Customer"
-      );
+      throw new APIError('Unable to Find Customer');
     }
   }
 
@@ -96,11 +89,9 @@ class CustomerRepository {
    */
   async findCustomerById({ id }) {
     try {
-      return await Customer.findById(id).populate("address");
+      return await Customer.findById(id).populate('address');
     } catch (err) {
-      throw new APIError(
-          "Unable to Find Customer"
-      );
+      throw new APIError('Unable to Find Customer');
     }
   }
 
@@ -116,14 +107,9 @@ class CustomerRepository {
     try {
       return await Customer.findByIdAndDelete(id);
     } catch (err) {
-      console.log('ERROR', err)
-      throw new APIError(
-          "Unable to Delete Customer"
-      );
+      throw new APIError('Unable to Delete Customer');
     }
   }
-
 }
-
 
 export default CustomerRepository;
