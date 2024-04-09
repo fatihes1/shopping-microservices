@@ -8,6 +8,16 @@ services:
       - '27017:27017'
     restart: always
 
+  mongo_seed:
+    image: mongo:latest
+    links:
+      - mongo_db
+    volumes:
+      - ./mongo-seed:/mongo-seed
+    command:
+      /mongo-seed/import.sh
+
+
   customer:
     build:
       dockerfile: Dockerfile
