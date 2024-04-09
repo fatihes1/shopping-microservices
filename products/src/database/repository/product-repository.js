@@ -15,7 +15,7 @@ class ProductRepository {
    * @returns {Promise<Object>} The created product object.
    * @throws {APIError} When there is an error creating the product.
    */
-  async CreateProduct({ name, desc, type, unit, price, available, suplier, banner }) {
+  async CreateProduct({ name, desc, type, unit, price, available, supplier, banner }) {
     try {
       const product = new Product({
         name,
@@ -24,7 +24,7 @@ class ProductRepository {
         unit,
         price,
         available,
-        suplier,
+        supplier,
         banner,
       });
 

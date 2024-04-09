@@ -21,8 +21,8 @@ export default async function (app, channel) {
    */
   app.post('/product/create', async (req, res, next) => {
     try {
-      const { name, desc, type, unit, price, available, suplier, banner } = req.body;
-      const { data } = await service.CreateProduct({ name, desc, type, unit, price, available, suplier, banner });
+      const { name, desc, type, unit, price, available, supplier, banner } = req.body;
+      const { data } = await service.CreateProduct({ name, desc, type, unit, price, available, supplier, banner });
       return res.json(data);
     } catch (err) {
       next(err);

@@ -1,0 +1,152 @@
+[
+  {
+    "name": "Elma",
+    "desc": "Taze ve lezzetli elma",
+    "type": "Meyve",
+    "banner": "",
+    "unit": 1,
+    "price": 2.5,
+    "available": true,
+    "supplier": "MeyveDünyası"
+  },
+  {
+    "name": "Süt",
+    "desc": "Taze ve pastörize süt",
+    "type": "SütÜrünleri",
+    "banner": "",
+    "unit": 1,
+    "price": 3.25,
+    "available": true,
+    "supplier": "SütÇiftliği"
+  },
+  {
+    "name": "Ekmek",
+    "desc": "Tam buğday ekmeği",
+    "type": "FırınÜrünleri",
+    "banner": "",
+    "unit": 1,
+    "price": 1.75,
+    "available": true,
+    "supplier": "EkmekFırını"
+  },
+  {
+    "name": "Tavuk Göğsü",
+    "desc": "Dana etiyle hazırlanmış sağlıklı tavuk göğsü",
+    "type": "EtveEtÜrünleri",
+    "banner": "",
+    "unit": 1,
+    "price": 9.99,
+    "available": false,
+    "supplier": "EtDünyası"
+  },
+  {
+    "name": "Makarna",
+    "desc": "Kepekli makarna",
+    "type": "KuruGıda",
+    "banner": "YeniÜrün",
+    "unit": 1,
+    "price": 2.99,
+    "available": true,
+    "supplier": "MakarnaA.Ş."
+  },
+  {
+    "name": "Salatalık",
+    "desc": "Taze ve organik salatalık",
+    "type": "Sebze",
+    "banner": "",
+    "unit": 1,
+    "price": 1.5,
+    "available": true,
+    "supplier": "SebzeBahçesi"
+  },
+  {
+    "name": "Kola",
+    "desc": "Kafeinsiz gazlı içecek",
+    "type": "İçecek",
+    "banner": "",
+    "unit": 1,
+    "price": 1.25,
+    "available": true,
+    "supplier": "GazlıİçeceklerLtd."
+  },
+  {
+    "name": "Dondurma",
+    "desc": "Vanilyalı dondurma",
+    "type": "Dondurma",
+    "banner": "İndirimde",
+    "unit": 1,
+    "price": 4.99,
+    "available": true,
+    "supplier": "Dondurmacı"
+  },
+  {
+    "name": "Bisküvi",
+    "desc": "Çikolatalı bisküvi",
+    "type": "Atıştırmalık",
+    "banner": "",
+    "unit": 1,
+    "price": 2.0,
+    "available": true,
+    "supplier": "BisküviFabrikası"
+  },
+  {
+    "name": "Portakal Suyu",
+    "desc": "Taze sıkılmış portakal suyu",
+    "type": "MeyveSuları",
+    "banner": "",
+    "unit": 1,
+    "price": 4.5,
+    "available": true,
+    "supplier": "SıkılmışSularA.Ş."
+  },
+  {
+    "name": "Çilek",
+    "desc": "Taze ve organik çilek",
+    "type": "Meyve",
+    "banner": "",
+    "unit": 1,
+    "price": 3.99,
+    "available": true,
+    "supplier": "MeyveBahçesi"
+  },
+  {
+    "name": "Yumurta",
+    "desc": "Organik tavuk yumurtası",
+    "type": "Yumurta",
+    "banner": "",
+    "unit": 1,
+    "price": 0.5,
+    "available": true,
+    "supplier": "YumurtaÇiftliği"
+  },
+  {
+    "name": "Patates",
+    "desc": "Taze ve organik patates",
+    "type": "Sebze",
+    "banner": "",
+    "unit": 1,
+    "price": 2.0,
+    "available": true,
+    "supplier": "SebzeBahçesi"
+  },
+  {
+    "name": "Balık",
+    "desc": "Taze deniz ürünü balık",
+    "type": "Balık",
+    "banner": "",
+    "unit": 1,
+    "price": 7.99,
+    "available": true,
+    "supplier": "Balıkçı"
+  },
+  {
+    "name": "Domates",
+    "desc": "Taze ve organik domates",
+    "type": "Sebze",
+    "banner": "",
+    "unit": 1,
+    "price": 2.5,
+    "available": true,
+    "supplier": "SebzeBahçesi"
+  }
+]
