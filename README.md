@@ -42,8 +42,8 @@ Her servis, aşağıdaki NPM paketlerini kullanmaktadır:
 ## Çalıştırma Adımları
 
 - Projeyi yerel makinenize klonlayın.
-- cp .env.example .env komutu ile kendi env dosyanızı oluşturun. Eğer sentry kullanmak istemiyorsanız; her servis'in `src/index.js` dosyasında şu satırı yoruma alın `setupSentryCapture(app);`.
-- Docker ilk ayağa kalktığında DB içerisinde product verileri olması için, ilk etapta `chmod +x mongo-seed/import.sh` komutunu çalıştırın. Bu aşama docker ayağa kalkarken verilerin db'ye yüklenmesi için gerekli.
+- `cp .env.example .env` komutu ile kendi env dosyanızı oluşturun. Eğer sentry kullanmak istemiyorsanız; her servis'in `src/index.js` dizininde bulunan dosyada şu satırı yoruma alın `setupSentryCapture(app);`.
+- Docker ilk ayağa kalktığında DB içerisinde product verileri olması için, ilk etapta `chmod +x mongo-seed/import.sh` komutunu çalıştırın. Bu aşama docker ayağa kalkarken verilerin db'ye yüklenmesi için gereklidir.
 - Docker ortamında projeyi çalıştırmak için `docker-compose up` veya `docker compose up -d` komutunu kullanın.
 - Alternatif olarak, her servisi ayrı ayrı başlatmak için npm start komutunu her bir servis için kullanabilirsiniz.
 
