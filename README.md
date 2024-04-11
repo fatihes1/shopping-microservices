@@ -5,6 +5,7 @@ Ayrıca, veritabanı olarak MongoDB ve mesaj sıralayıcısı olarak RabbitMQ ku
 
 ![](./structure.png)
 
+For English readme file, please click [here](./EN_README.md).
 
 ## Mikroservis ve Mikroservis Mimarisi
 
